@@ -1,0 +1,39 @@
+{
+  "name": "stepsjs",
+  "version": "0.0.1",
+  "description": "A jQuery plugin that manifests a stepped form process",
+  "main": "Gruntfile.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "default"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/micahblu/stepsjs.git"
+  },
+  "keywords": [
+    "jQuery",
+    "plugin",
+    "form",
+    "validation",
+    "steps"
+  ],
+  "author": "Micah Blu",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/micahblu/stepsjs/issues"
+  },
+  "homepage": "https://github.com/micahblu/stepsjs",
+  "devDependencies": {
+    "grunt": "~0.4.4",
+    "grunt-contrib-watch": "~0.6.1",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-ember-templates": "~0.4.20",
+    "grunt-contrib-qunit": "~0.4.0",
+    "grunt-contrib-jshint": "~0.9.2",
+    "grunt-contrib-connect": "~0.7.1",
+    "qunitjs": "~1.14.0"
+  }
+}
