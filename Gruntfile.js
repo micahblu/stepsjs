@@ -22,6 +22,12 @@ module.exports = function(grunt) {
           src: ["**/*"],
           dest: "build/assets/js/vendor/"
         }]
+      },
+      index: {
+        files: [{
+          src: "src/index.html",
+          dest: "build/index.html"
+        }]
       }
     },
 
@@ -70,11 +76,13 @@ module.exports = function(grunt) {
       setup: {
         files: ['src/sass/*.scss', 
                 'src/js/templates/**/*.hbs', 
-                'src/js/**/*.js'],
+                'src/js/**/*.js',
+                'src/**/*.html'],
 
         tasks: ['sass',
                 //'concat',
                 'uglify',
+                'copy',
                 //-'qunit',
                 'jshint']
       }
