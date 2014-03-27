@@ -15,18 +15,25 @@
 		<script type="text/x-handlebars" id="steps">
 			<div class="steps-container">
 			{{#steps}}
-				<div class="panel-header" data-target="#panel-{{id}}">
-					{{title}}
-				</div>
+				<div id="panel-{{id}}" class="panel-container">
+					<div class="panel-header" data-target="#panel-{{id}}">
+						{{title}}
+					</div>
 
-				<div id="panel-{{id}}" class="panel-body {{class}}">
-					{{#fields}}
-					<p>
-						<label>{{label}}</label>
-						<input type="{{type}}" name="{{name}}" />
-					</p>
-					{{/fields}}
-				</div>
+					<div id="panel-body" class="panel-body {{class}}">
+						{{#fields}}
+						<p>
+							<label>{{label}}</label>
+							<input type="{{type}}" name="{{name}}" />
+						</p>
+						{{/fields}}
+
+						<div class="step-form-controls">
+							<button class="button btn left prev-step">Back</button>
+							<button class="button btn left nest-step">Continue</button>
+						</div>
+					</div>	
+				</div><!-- .panel-container -->
 			{{/steps}}
 			</div>
 		</script>

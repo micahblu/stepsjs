@@ -1,23 +1,65 @@
 .steps-container{
+	width: 100%;
 	font-family: 'Open Sans', Arial, sans-serif;
-	.panel-header{
+	.panel-container{
+
+		clear: both;
+		float: left;
+		width: 100%;
 		margin-top: .5rem;
-		background: #fafafa;
-		border: 1px solid #ccc;
-		border-radius: 5px 5px 0px 0px;
-		padding: .5rem;
-		box-sizing: border-box;
-	}
 
-	.panel-body{
+		.panel-header{
+			margin-top: .5rem;
+			background: #fafafa;
+			border: 1px solid #ccc;
+			border-radius: 5px 5px 0px 0px;
+			padding: .5rem;
+			box-sizing: border-box;
+		}
 
-		border: 1px solid #ccc;
-		border-top: 0px;
-		padding: 1em;
-		box-sizing: border-box;
+		.panel-body{
 
-		&.collapse{
-			display:none;
+			border: 1px solid #ccc;
+			border-top: 0px;
+			padding: 1em;
+			box-sizing: border-box;
+			float:left;
+			width: 100%;
+
+			&.collapse{
+				display:none;
+			}
+
+			&:after{
+				clear: both;
+			}
+
+			.step-form-controls{
+				width: 100%;
+				box-sizing: border-box;
+				padding: 1em;
+				float:left;
+				
+				button{
+					&.prev-step{
+						float:left;
+
+						&:after{
+							content: ' ';
+							clear:both;
+						}
+					}
+
+					&.next-step{
+						float:right;
+
+						&:after{
+							content: ' ';
+							clear:both;
+						}	
+					}
+				}
+			}
 		}
 	}
 }
