@@ -3,6 +3,14 @@
 	font-family: 'Open Sans', Arial, sans-serif;
 	.panel-container{
 
+		&.locked{
+			opacity: .7;
+
+			.panel-header{
+				cursor: default!important;
+			}
+		}
+
 		clear: both;
 		float: left;
 		width: 100%;

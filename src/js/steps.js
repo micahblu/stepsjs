@@ -19,7 +19,6 @@
 			data.steps[i].id = i;
 		}
 
-
 		Handlebars.registerHelper('list', function(context, options){
 
 			var ret = '';
@@ -34,12 +33,13 @@
 			return ret;
 		});
 
-
-
+		// compile handlebars template
 		template = Handlebars.compile(source);
 
+		// wrap out outbound content in a div used for jQuery
 		out = document.createElement('div');
 
+		// append templated output to our wrapper div
 		$(out).append(template(data));
 
 		// by default make next button's disabled
@@ -48,13 +48,14 @@
 		// remove the prev button from first step panel
 		$(out).find("#panel-0 .prev-step").hide();
 
+		// by default lock panels
 		$(out).find(".panel-container").addClass('locked');
 
+		// add keyup listeners to input fields
 		$(out).find("input[type='text']").each(function(index){
 			$(this).attr("data-group", $(this).parents(".panel-container").attr("id"));
 
 			$(this).on('keyup', function(){
-
 				//set our conditions and met vars
 				conditions = 0;
 				met = 0;
@@ -79,8 +80,13 @@
 					parent.next().removeClass('locked');
 
 					// Optionally automatically open the next step? 
-				}else{
+				}
+				// Conditions No longer met disable continue and lock the next panel
+				else{
+					// disable next step button
 					parent.find(".next-step").attr("disabled", "disabled");
+					//lock the next panel
+					parent.next().addClass('locked');
 				}
 			});
 		});
@@ -91,24 +97,38 @@
 		$(".steps-container").on('click', function(e){
 
 			if(has("next-step", e.target.className)){
-
-				// collapse this panel
-				$('.panel-body').addClass('collapse');
-
-				// expand the next panel
-				$(e.target).parents('.panel-container').next().find('.panel-body').removeClass('collapse');
-
+				next(e);
 			} else if(has("prev-step", e.target.className)){
-				// collapse this panel
-				$('.panel-body').addClass('collapse');
+				prev(e);
+			}else if(has("panel-header", e.target.className)){
 
-				// expand the next panel
-				$(e.target).parents('.panel-container').prev().find('.panel-body').removeClass('collapse');
+				if(!$(e.target).parents(".panel-container").hasClass("locked")){
+					if($(e.target).parents(".panel-container").find(".panel-body").hasClass("collapse")){
+						// collapse this panel
+						$('.panel-body').addClass('collapse');
+
+						// expand this panel
+						$(e.target).parents(".panel-container").find(".panel-body").removeClass('collapse');
+					}
+				}
 			}
-			//if($(this).parents(".panel-container").hasClass('locked'));
-			//console.log(e.target.className);
-			
 		});
+
+		function next(e){
+			// collapse this panel
+			$('.panel-body').addClass('collapse');
+
+			// expand the next panel
+			$(e.target).parents('.panel-container').next().find('.panel-body').removeClass('collapse');
+		}
+
+		function prev(e){
+			// collapse this panel
+			$('.panel-body').addClass('collapse');
+
+			// expand the next panel
+			$(e.target).parents('.panel-container').prev().find('.panel-body').removeClass('collapse');
+		}
 
 		function has(term, str){
 			var patt = new RegExp(term);
