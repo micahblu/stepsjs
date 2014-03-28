@@ -7,7 +7,10 @@
 				conditions,
 				source,
 				template
-				out;
+				out,
+				parent,
+				conditions,
+				met;
 		
 		source = this.html();
 
@@ -22,7 +25,7 @@
 
 			var ret = '';
 			for(var i=0, j=context.length; i<j; i++){
-				console.log(context);
+
 				ret +=	"
 					<p>
 						<label>" + context[i].label + "</label>
@@ -48,8 +51,36 @@
 
 		$(out).find("input[type='text']").each(function(index){
 			$(this).attr("data-group", $(this).parents(".panel-container").attr("id"));
+
 			$(this).on('keyup', function(){
-				console.log(this.getAttribute("data-group"));
+
+				//set our conditions and met vars
+				conditions = 0;
+				met = 0;
+
+				parent = $(this).parents('.panel-container');
+
+				// check for conditions being met, if so allow continue button
+				parent.find('input').each(function(index){
+					conditions++;
+					if(this.getAttribute('data-condition') == 'required' && $(this).val().trim() !== ""){
+						met++;
+					}
+				});
+
+				//TODO: Add hook
+				if(conditions === met){
+					// Enable next button
+					parent.find(".next-step").removeAttr("disabled");
+
+					// Unlock the next step..
+					parent.find('.locked').removeClass('locked');
+					parent.next().find('.locked').removeClass('locked');
+
+					// Optionally automatically open the next step? 
+				}else{
+					parent.find(".next-step").attr("disabled", "disabled");
+				}
 			});
 		});
 
@@ -58,7 +89,7 @@
 		// Handle Events
 		$(".panel-header").on('click', function(e){
 			if($(this.getAttribute("data-target")).find('.panel-body').hasClass('locked')){
-				//return;	
+				return;	
 			}
 			if($(this.getAttribute("data-target")).find('.panel-body').hasClass('collapse')){
 				$('.panel-body').addClass('collapse');
