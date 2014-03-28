@@ -88,18 +88,30 @@
 		this.after(out);
 
 		// Event Delegation
-		$(".panel-header").on('click', function(e){
-			if($(this.getAttribute("data-target")).hasClass('locked')){
-				return;	
-			}
-			if($(this.getAttribute("data-target")).find('.panel-body').hasClass('collapse')){
+		$(".steps-container").on('click', function(e){
+
+			if(has("next-step", e.target.className)){
+
+				// collapse this panel
 				$('.panel-body').addClass('collapse');
-				$(this.getAttribute("data-target")).find('.panel-body').removeClass('collapse');
+
+				// expand the next panel
+				$(e.target).parents('.panel-container').next().find('.panel-body').removeClass('collapse');
+
+			} else if(has("prev-step", e.target.className)){
+				// collapse this panel
+				$('.panel-body').addClass('collapse');
+
+				// expand the next panel
+				$(e.target).parents('.panel-container').prev().find('.panel-body').removeClass('collapse');
 			}
+			//if($(this).parents(".panel-container").hasClass('locked'));
+			//console.log(e.target.className);
+			
 		});
 
-		function contains(needle, str){
-			var patt = new RegExp(needle);
+		function has(term, str){
+			var patt = new RegExp(term);
 			return patt.test(str);
 		}
 	};
