@@ -21,12 +21,8 @@
 					</div>
 
 					<div id="panel-body" class="panel-body {{class}}">
-						{{#fields}}
-						<p>
-							<label>{{label}}</label>
-							<input type="{{type}}" name="{{name}}" />
-						</p>
-						{{/fields}}
+
+						{{#list fields}}{{/list}}
 
 						<div class="step-form-controls">
 							<button class="button btn left prev-step">Back</button>
@@ -78,11 +74,14 @@
 						name: "fname",
 						type: "text",
 						required: true,
+						expects: '',
+						id: 'fname',
 						classNames: "medium"
 					},
 					{
 						label: "Last Name",
 						name: "lname",
+						id: 'lname',
 						type: "text",
 						required: true,
 						classNames: "medium"
