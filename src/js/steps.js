@@ -17,7 +17,6 @@
 		for(var i=0; i < data.steps.length; i++){
 			// add id to each object
 			data.steps[i].id = i;
-			data.steps[i].class = data.steps[i].class + ' locked';
 		}
 
 
@@ -49,6 +48,8 @@
 		// remove the prev button from first step panel
 		$(out).find("#panel-0 .prev-step").hide();
 
+		$(out).find(".panel-container").addClass('locked');
+
 		$(out).find("input[type='text']").each(function(index){
 			$(this).attr("data-group", $(this).parents(".panel-container").attr("id"));
 
@@ -74,8 +75,8 @@
 					parent.find(".next-step").removeAttr("disabled");
 
 					// Unlock the next step..
-					parent.find('.locked').removeClass('locked');
-					parent.next().find('.locked').removeClass('locked');
+					parent.removeClass('locked');
+					parent.next().removeClass('locked');
 
 					// Optionally automatically open the next step? 
 				}else{
@@ -86,9 +87,9 @@
 
 		this.after(out);
 
-		// Handle Events
+		// Event Delegation
 		$(".panel-header").on('click', function(e){
-			if($(this.getAttribute("data-target")).find('.panel-body').hasClass('locked')){
+			if($(this.getAttribute("data-target")).hasClass('locked')){
 				return;	
 			}
 			if($(this.getAttribute("data-target")).find('.panel-body').hasClass('collapse')){
