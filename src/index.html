@@ -21,14 +21,12 @@
 					</div>
 
 					<div id="panel-body" class="panel-body {{class}}">
-
 						{{#list fields}}{{/list}}
-
 						<div class="step-form-controls">
 							<button class="button btn left prev-step">Back</button>
 							<button class="button btn left next-step">Continue</button>
 						</div>
-					</div>	
+					</div>
 				</div><!-- .panel-container -->
 			{{/steps}}
 			</div>
@@ -49,9 +47,10 @@
 
 				fields:[
 					{
-						label: "First Name",
-						name: "fname",
-						type: "text",
+						label: "Choose an icon",
+						name: "icon",
+						type: "select",
+						options: {'tesla': 'Nikola Tesla', 'einstein': 'Albert Einstein', 'neuman': 'Jon Von Neumann', 'turing': 'Alan Turing'},
 						required: true,
 						classNames: "medium"
 					},

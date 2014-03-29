@@ -24,11 +24,18 @@
 			var ret = '';
 			for(var i=0, j=context.length; i<j; i++){
 
-				ret +=	"
-					<p>
-						<label>" + context[i].label + "</label>
-						<input type=\"" + context[i].type + "\" name=\"" + context[i].name + "\" data-condition=\""  + (context[i].required ? 'required' : '') + "\" />
-					</p>";
+				ret +=	"\n<p>\n\t<label>" + context[i].label + "</label>\n";
+
+				if(context[i].type == 'select'){
+					ret += "\t<select name=\"name\">\n";
+					for(var option in context[i].options){
+						ret += "\t\t<option name=\"" + option + "\">" + context[i].options[option] + "</option>\n";	
+					}
+					ret += "\t</select>\n";
+				}else{
+					ret += "\t<input type=\"" + context[i].type + "\" name=\"" + context[i].name + "\" data-condition=\""  + (context[i].required ? 'required' : '') + "\" />\n";
+				}
+				ret += "</p>";
 			}
 			return ret;
 		});
@@ -65,7 +72,7 @@
 				// check for conditions being met, if so allow continue button
 				parent.find('input').each(function(index){
 					conditions++;
-					if(this.getAttribute('data-condition') == 'required' && $(this).val().trim() !== ""){
+					if(this.getAttribute('data-condition') === 'required' && $(this).val().trim() !== ""){
 						met++;
 					}
 				});
