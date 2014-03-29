@@ -72,6 +72,9 @@
 		// by default lock panels
 		$(out).find(".panel-container").addClass('locked');
 
+		// Unlock first step 
+		$(out).find(".steps-container .panel-container:first-child").removeClass('locked');
+
 		// add event listeners to form fields
 		$(out).find("input, select, textarea").each(function(index){
 			$(this).attr("data-group", $(this).parents(".panel-container").attr("id"));
@@ -161,7 +164,9 @@
 			panel.find(".next-step").attr("disabled", "disabled");
 
 			//lock the next panel
-			panel.next().addClass('locked');
+			panel.nextAll().addClass('locked');
+
+
 		}
 
 		function next(e){
