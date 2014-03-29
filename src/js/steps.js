@@ -27,7 +27,10 @@
 				ret +=	"\n<p>\n\t<label>" + context[i].label + "</label>\n";
 
 				if(context[i].type == 'select'){
-					ret += "\t<select name=\"name\">\n";
+					ret += "\t<select name=\"name\" data-condition=\""  + (context[i].required ? 'required' : '') + "\">\n";
+					if ( context[i].placeholder && context[i].placeholder.replace(/\s/, '') !== "" ) {
+						ret += "\t\t<option value=\"\">" + context[i].placeholder + "</option>\n";
+					}
 					for(var option in context[i].options){
 						ret += "\t\t<option name=\"" + option + "\">" + context[i].options[option] + "</option>\n";	
 					}
@@ -58,43 +61,14 @@
 		// by default lock panels
 		$(out).find(".panel-container").addClass('locked');
 
-		// add keyup listeners to input fields
-		$(out).find("input[type='text']").each(function(index){
+		// add event listeners to form fields
+		$(out).find("input, select, textarea").each(function(index){
 			$(this).attr("data-group", $(this).parents(".panel-container").attr("id"));
 
-			$(this).on('keyup', function(){
-				//set our conditions and met vars
-				conditions = 0;
-				met = 0;
-
-				parent = $(this).parents('.panel-container');
-
-				// check for conditions being met, if so allow continue button
-				parent.find('input').each(function(index){
-					conditions++;
-					if(this.getAttribute('data-condition') === 'required' && $(this).val().trim() !== ""){
-						met++;
-					}
-				});
-
-				//TODO: Add hook
-				if(conditions === met){
-					// Enable next button
-					parent.find(".next-step").removeAttr("disabled");
-
-					// Unlock the next step..
-					parent.removeClass('locked');
-					parent.next().removeClass('locked');
-
-					// Optionally automatically open the next step? 
-				}
-				// Conditions No longer met disable continue and lock the next panel
-				else{
-					// disable next step button
-					parent.find(".next-step").attr("disabled", "disabled");
-					//lock the next panel
-					parent.next().addClass('locked');
-				}
+			$(this).on('keyup change', function(){
+				panel = $(this).parents('.panel-container');
+				if(conditionsMet(panel)) { unlockNextStep(panel); }
+				else { lockNextStep(panel); }
 			});
 		});
 
@@ -120,6 +94,44 @@
 				}
 			}
 		});
+
+		function conditionsMet(panel){
+
+			//set our conditions and met vars
+			conditions = 0;
+			met = 0;	
+
+			// check for conditions being met, if so allow continue button
+			panel.find('input, select, textarea').each(function(index){
+				conditions++;
+				if(this.getAttribute('data-condition') === 'required' && $(this).val().trim() !== ""){
+					met++;
+				}
+			});
+
+			//TODO: Add hook
+			if(conditions === met){
+				return true;
+			}else{
+				return false;
+			}		
+		}
+
+		function unlockNextStep(panel){
+			// Enable next button
+			panel.find(".next-step").removeAttr("disabled");
+
+			// Unlock the next step..
+			panel.removeClass('locked');
+			panel.next().removeClass('locked');
+		}
+
+		function lockNextStep(panel){
+			// disable next step button
+			panel.find(".next-step").attr("disabled", "disabled");
+			//lock the next panel
+			panel.next().addClass('locked');
+		}
 
 		function next(e){
 			// collapse this panel

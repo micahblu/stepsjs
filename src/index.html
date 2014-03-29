@@ -42,7 +42,7 @@
 	var data = {
 		steps: [
 			{
-				title: 'title one',
+				title: 'Title One',
 				class: '',
 
 				fields:[
@@ -51,6 +51,7 @@
 						name: "icon",
 						type: "select",
 						options: {'tesla': 'Nikola Tesla', 'einstein': 'Albert Einstein', 'neuman': 'Jon Von Neumann', 'turing': 'Alan Turing'},
+						placeholder: 'Choose genius',
 						required: true,
 						classNames: "medium"
 					},
@@ -64,7 +65,31 @@
 				]
 			},
 			{
-				title: 'title two',
+				title: 'Title Two',
+				class: 'collapse',
+
+				fields:[
+					{
+						label: "First Name",
+						name: "fname",
+						type: "text",
+						required: true,
+						expects: '',
+						id: 'fname',
+						classNames: "medium"
+					},
+					{
+						label: "Last Name",
+						name: "lname",
+						id: 'lname',
+						type: "text",
+						required: true,
+						classNames: "medium"
+					}
+				]
+			},
+			{
+				title: 'Title Three',
 				class: 'collapse',
 
 				fields:[
