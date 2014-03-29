@@ -26,17 +26,28 @@
 
 				ret +=	"\n<p>\n\t<label>" + context[i].label + "</label>\n";
 
-				if(context[i].type == 'select'){
-					ret += "\t<select name=\"name\" data-condition=\""  + (context[i].required ? 'required' : '') + "\">\n";
-					if ( context[i].placeholder && context[i].placeholder.replace(/\s/, '') !== "" ) {
-						ret += "\t\t<option value=\"\">" + context[i].placeholder + "</option>\n";
-					}
-					for(var option in context[i].options){
-						ret += "\t\t<option name=\"" + option + "\">" + context[i].options[option] + "</option>\n";	
-					}
-					ret += "\t</select>\n";
-				}else{
-					ret += "\t<input type=\"" + context[i].type + "\" name=\"" + context[i].name + "\" data-condition=\""  + (context[i].required ? 'required' : '') + "\" />\n";
+				switch(context[i].type){
+
+					case 'select': 
+						ret += "\t<select name=\"name\" data-condition=\""  + (context[i].required ? 'required' : '') + "\">\n";
+						if ( context[i].placeholder && context[i].placeholder.replace(/\s/, '') !== "" ) {
+							ret += "\t\t<option value=\"\">" + context[i].placeholder + "</option>\n";
+						}
+						for(var option in context[i].options){
+							ret += "\t\t<option name=\"" + option + "\">" + context[i].options[option] + "</option>\n";	
+						}
+						ret += "\t</select>\n";
+						break;
+
+					case 'text':
+						ret += "\t<input type=\"text\" name=\"" + context[i].name + "\" data-condition=\""  + (context[i].required ? 'required' : '') + "\" />\n";
+						break;
+
+					case 'radio':
+						for(var option in context[i].options){
+							ret += "\t<input type=\"radio\" name=\"" + context[i].name + "\" data-condition=\""  + (context[i].required ? 'required' : '') + "\" /> " + context[i].options[option] + "\n";
+						}
+						break;
 				}
 				ret += "</p>";
 			}
@@ -109,6 +120,25 @@
 				}
 			});
 
+			var r = [];
+			panel.find('input[type="radio"]').each(function(){
+
+				// Find condition to meet
+				if(this.getAttribute('data-condition') == 'required' && !r[this.name]){
+					r[this.name] = [];
+					conditions++;
+					console.log('adding condition for ' + this.name);
+				}
+
+				// Collect met conditions
+				if(this.getAttribute('data-condition') == 'required' && r[this.name] && this.checked){
+					met++;
+					console.log('met condition for: ' + this.name);
+				}
+
+			});
+
+
 			//TODO: Add hook
 			if(conditions === met){
 				return true;
@@ -129,6 +159,7 @@
 		function lockNextStep(panel){
 			// disable next step button
 			panel.find(".next-step").attr("disabled", "disabled");
+
 			//lock the next panel
 			panel.next().addClass('locked');
 		}
