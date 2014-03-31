@@ -8,7 +8,6 @@
 				template
 				out,
 				parent,
-				conditions,
 				met;
 		
 		source = this.html();
@@ -17,7 +16,7 @@
 			// add id to each object
 			data.steps[i].id = i;
 			if(i > 0) {
-				data.steps[i].locked = true;
+				data.steps[i].validates = false;
 			}
 		}
 
@@ -151,10 +150,10 @@
 
 			//TODO: Add hook
 			if(conditions === met){
-				data.steps[panel.attr('id').replace(/[^0-9]+/, '')].locked = false;
+				data.steps[panel.attr('id').replace(/[^0-9]+/, '')].validates = true;
 				return true;
 			}else{
-				data.steps[panel.attr('id').replace(/[^0-9]+/, '')].locked = true;
+				data.steps[panel.attr('id').replace(/[^0-9]+/, '')].validates = false;
 				return false;
 			}		
 		}
@@ -168,9 +167,9 @@
 
 			// unlock all next panels where conditions are met
 			for(var i=0; i < data.steps.length; i++){
-				if(!data.steps[i].locked){
-					console.log("#panel-" + data.steps[i].id);
-					$("#panel-" + data.steps[i].id).removeClass('locked');
+				if(data.steps[i].validates){
+					console.log("#panel-" + (data.steps[i].id + 1)  + " should be unloacked");
+					$("#panel-" + (data.steps[i].id + 1) ).removeClass('locked');
 				}
 			}
 		}
