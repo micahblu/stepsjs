@@ -1,22 +1,22 @@
 
 (function($){
-	$.fn.steps = function(data) {
+	$.fn.steps = function(setup, callback) {
 
-		var steps = [],
+		var fields = {},
 				conditions,
 				source,
-				template
+				template,
 				out,
 				parent,
 				met;
 		
 		source = this.html();
 
-		for(var i=0; i < data.steps.length; i++){
+		for(var i=0; i < setup.steps.length; i++){
 			// add id to each object
-			data.steps[i].id = i;
+			setup.steps[i].id = i;
 			if(i > 0) {
-				data.steps[i].validates = false;
+				setup.steps[i].validates = false;
 			}
 		}
 
@@ -66,7 +66,7 @@
 		out = document.createElement('div');
 
 		// append templated output to our wrapper div
-		$(out).append(template(data));
+		$(out).append(template(setup));
 
 		// by default make next button's disabled
 		$(out).find(".next-step").attr("disabled", "disabled");
@@ -77,6 +77,11 @@
 		// by default lock panels
 		$(out).find(".panel-container").addClass('locked');
 
+		// add callback hook for last step next button
+		$(out).find(".panel-container .next-step:last-child").on('click', function(){
+			callback.apply(fields);	
+		})
+
 		// Unlock first step 
 		$(out).find(".steps-container .panel-container:first-child").removeClass('locked');
 
@@ -86,8 +91,20 @@
 
 			$(this).on('keyup change', function(){
 				panel = $(this).parents('.panel-container');
-				if(conditionsMet(panel)) { unlockNextStep(panel); }
-				else { lockNextStep(panel); }
+				
+
+				// add value to fields object
+				fields[this.name] = this.value;
+
+				//fields.push(this.name)
+
+				if(conditionsMet(panel)) {
+					//data.steps[panel.attr('id').replace(/[^0-9]+/, '')].fields[]
+					unlockNextStep(panel); 
+				}
+				else { 
+					lockNextStep(panel); 
+				}
 			});
 		});
 
@@ -150,10 +167,10 @@
 
 			//TODO: Add hook
 			if(conditions === met){
-				data.steps[panel.attr('id').replace(/[^0-9]+/, '')].validates = true;
+				setup.steps[panel.attr('id').replace(/[^0-9]+/, '')].validates = true;
 				return true;
 			}else{
-				data.steps[panel.attr('id').replace(/[^0-9]+/, '')].validates = false;
+				setup.steps[panel.attr('id').replace(/[^0-9]+/, '')].validates = false;
 				return false;
 			}		
 		}
@@ -166,10 +183,10 @@
 			panel.next().removeClass('locked');
 
 			// unlock all next panels where conditions are met
-			for(var i=0; i < data.steps.length; i++){
-				if(data.steps[i].validates){
-					console.log("#panel-" + (data.steps[i].id + 1)  + " should be unloacked");
-					$("#panel-" + (data.steps[i].id + 1) ).removeClass('locked');
+			for(var i=0; i < setup.steps.length; i++){
+				if(setup.steps[i].validates){
+					//console.log("#panel-" + (setup.steps[i].id + 1)  + " should be unloacked");
+					$("#panel-" + (setup.steps[i].id + 1) ).removeClass('locked');
 				}
 			}
 		}

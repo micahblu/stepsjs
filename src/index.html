@@ -39,7 +39,7 @@
 
 	<script>
 
-	var data = {
+	var setup = {
 		steps: [
 			{
 				title: 'Step One',
@@ -62,7 +62,6 @@
 						required: true,
 						classNames: "medium"
 					},
-
 					{
 						label: "Gender",
 						name: "gender",
@@ -132,7 +131,9 @@
 		]
 	};
 	
-	$("#steps").steps(data);
+	$("#steps").steps(setup, function(fields){
+		console.log(fields);
+	});
 
 	</script>
 
