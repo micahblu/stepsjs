@@ -15,10 +15,18 @@
 		for(var i=0; i < setup.steps.length; i++){
 			// add id to each object
 			setup.steps[i].id = i;
+			setup.steps[i].step = $(setup.steps[i].content).html();
+			//console.log($(setup.steps[i].content).html());
 			if(i > 0) {
 				setup.steps[i].validates = false;
 			}
 		}
+
+		Handlebars.registerHelper('content', function(options){
+			//console.log(this.step);
+			template = Handlebars.compile(this.step);
+			return template();
+		});
 
 		Handlebars.registerHelper('list', function(context, options){
 
