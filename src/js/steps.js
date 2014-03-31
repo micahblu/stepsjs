@@ -1,9 +1,8 @@
 
-
 (function($){
 	$.fn.steps = function(data) {
 
-		var steps = [], 	
+		var steps = [],
 				conditions,
 				source,
 				template
@@ -17,6 +16,9 @@
 		for(var i=0; i < data.steps.length; i++){
 			// add id to each object
 			data.steps[i].id = i;
+			if(i > 0) {
+				data.steps[i].locked = true;
+			}
 		}
 
 		Handlebars.registerHelper('list', function(context, options){
@@ -111,6 +113,9 @@
 
 		function conditionsMet(panel){
 
+			if(!panel){
+				return false;
+			}
 			//set our conditions and met vars
 			conditions = 0;
 			met = 0;	
@@ -130,22 +135,22 @@
 				if(this.getAttribute('data-condition') == 'required' && !r[this.name]){
 					r[this.name] = [];
 					conditions++;
-					console.log('adding condition for ' + this.name);
+					//console.log('adding condition for ' + this.name);
 				}
 
 				// Collect met conditions
 				if(this.getAttribute('data-condition') == 'required' && r[this.name] && this.checked){
 					met++;
-					console.log('met condition for: ' + this.name);
 				}
 
 			});
 
-
 			//TODO: Add hook
 			if(conditions === met){
+				data.steps[panel.attr('id').replace(/[^0-9]+/, '')].locked = false;
 				return true;
 			}else{
+				data.steps[panel.attr('id').replace(/[^0-9]+/, '')].locked = true;
 				return false;
 			}		
 		}
@@ -155,8 +160,15 @@
 			panel.find(".next-step").removeAttr("disabled");
 
 			// Unlock the next step..
-			panel.removeClass('locked');
 			panel.next().removeClass('locked');
+
+			// unlock all next panels where conditions are met
+			for(var i=0; i < data.steps.length; i++){
+				if(!data.steps[i].locked){
+					console.log("#panel-" + data.steps[i].id);
+					$("#panel-" + data.steps[i].id).removeClass('locked');
+				}
+			}
 		}
 
 		function lockNextStep(panel){
@@ -165,8 +177,6 @@
 
 			//lock the next panel
 			panel.nextAll().addClass('locked');
-
-
 		}
 
 		function next(e){
