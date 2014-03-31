@@ -50,6 +50,10 @@
 							ret += "\t<input type=\"radio\" name=\"" + context[i].name + "\" data-condition=\""  + (context[i].required ? 'required' : '') + "\" /> " + context[i].options[option] + "\n";
 						}
 						break;
+
+					case 'textarea':
+						ret += "\t<textarea name=\"" + context[i].name + "\" data-condition=\""  + (context[i].required ? 'required' : '') + "\"></textarea>\n"
+						break;
 				}
 				ret += "</p>";
 			}
