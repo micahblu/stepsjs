@@ -124,12 +124,11 @@
 				step = setup.steps[step.attr("id").replace(/[^0-9]+/, '')].onClickEvent.apply(step, [e]);
 			}
 
-
 			if(has("next-step", e.target.className)){
 				next(e);
 			} else if(has("prev-step", e.target.className)){
 				prev(e);
-			}else if(has("panel-header", e.target.className)){
+			}else if(has("panel-heading", e.target.className) || has("panel-title", e.target.className)){
 
 				if(!step.hasClass("locked")){
 					if(step.find(".panel-body").hasClass("collapse")){
@@ -154,9 +153,12 @@
 
 			// check for conditions being met, if so allow continue button
 			panel.find('input, select, textarea').each(function(index){
-				conditions++;
-				if(this.getAttribute('data-condition') === 'required' && $(this).val().trim() !== ""){
-					met++;
+				
+				if(this.getAttribute('data-condition') === 'required'){ 
+					conditions++;
+					if($(this).val().trim() !== ""){
+						met++;
+					}
 				}
 			});
 
@@ -187,6 +189,8 @@
 		}
 
 		function unlockNextStep(panel){
+
+			console.log("unlocking next panel ");
 			// Enable next button
 			panel.find(".next-step").removeAttr("disabled");
 
