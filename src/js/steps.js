@@ -4,6 +4,7 @@
 
 		var fields = {},
 				conditions,
+				step,
 				source,
 				template,
 				out,
@@ -16,14 +17,13 @@
 			// add id to each object
 			setup.steps[i].id = i;
 			setup.steps[i].step = $(setup.steps[i].content).html();
-			//console.log($(setup.steps[i].content).html());
+
 			if(i > 0) {
 				setup.steps[i].validates = false;
 			}
 		}
 
 		Handlebars.registerHelper('content', function(options){
-			//console.log(this.step);
 			template = Handlebars.compile(this.step);
 			return template();
 		});
@@ -86,8 +86,8 @@
 		$(out).find(".panel-container").addClass('locked');
 
 		// add callback hook for last step next button
-		$(out).find(".panel-container .next-step:last-child").on('click', function(){
-			callback.apply(fields);	
+		$(out).find(".panel-container:last-child .next-step").on('click', function(e){
+			callback.apply(this, [fields]);	
 		})
 
 		// Unlock first step 
@@ -99,15 +99,11 @@
 
 			$(this).on('keyup change', function(){
 				panel = $(this).parents('.panel-container');
-				
 
 				// add value to fields object
 				fields[this.name] = this.value;
 
-				//fields.push(this.name)
-
 				if(conditionsMet(panel)) {
-					//data.steps[panel.attr('id').replace(/[^0-9]+/, '')].fields[]
 					unlockNextStep(panel); 
 				}
 				else { 
@@ -121,19 +117,27 @@
 		// Event Delegation
 		$(".steps-container").on('click', function(e){
 
+			step = $(e.target).parents(".panel-container");
+
+			if(setup.steps[step.attr("id").replace(/[^0-9]+/, '')].onClickEvent){
+				//console.log(e.target);
+				step = setup.steps[step.attr("id").replace(/[^0-9]+/, '')].onClickEvent.apply(step, [e]);
+			}
+
+
 			if(has("next-step", e.target.className)){
 				next(e);
 			} else if(has("prev-step", e.target.className)){
 				prev(e);
 			}else if(has("panel-header", e.target.className)){
 
-				if(!$(e.target).parents(".panel-container").hasClass("locked")){
-					if($(e.target).parents(".panel-container").find(".panel-body").hasClass("collapse")){
+				if(!step.hasClass("locked")){
+					if(step.find(".panel-body").hasClass("collapse")){
 						// collapse this panel
 						$('.panel-body').addClass('collapse');
 
 						// expand this panel
-						$(e.target).parents(".panel-container").find(".panel-body").removeClass('collapse');
+						step.find(".panel-body").removeClass('collapse');
 					}
 				}
 			}
@@ -163,7 +167,6 @@
 				if(this.getAttribute('data-condition') == 'required' && !r[this.name]){
 					r[this.name] = [];
 					conditions++;
-					//console.log('adding condition for ' + this.name);
 				}
 
 				// Collect met conditions
