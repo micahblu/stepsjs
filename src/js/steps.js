@@ -104,7 +104,14 @@
 				fields[this.name] = this.value;
 
 				if(conditionsMet(panel)) {
-					unlockNextStep(panel); 
+
+					if(setup.onPreLoadNext){
+						setup.onPreLoadNext.apply(null, [fields]);
+					}
+					unlockNextStep(panel);
+					if(setup.onPostLoadNext){
+						setup.onPostLoadNext.apply(null, [fields]);
+					}
 				}
 				else { 
 					lockNextStep(panel); 
@@ -119,9 +126,10 @@
 
 			step = $(e.target).parents(".panel-container");
 
+
 			if(setup.steps[step.attr("id").replace(/[^0-9]+/, '')].onClickEvent){
 				//console.log(e.target);
-				step = setup.steps[step.attr("id").replace(/[^0-9]+/, '')].onClickEvent.apply(step, [e]);
+				setup.steps[step.attr("id").replace(/[^0-9]+/, '')].onClickEvent.apply(step, [e]);
 			}
 
 			if(has("next-step", e.target.className)){
@@ -149,6 +157,7 @@
 			}
 			//set our conditions and met vars
 			conditions = 0;
+
 			met = 0;	
 
 			// check for conditions being met, if so allow continue button
@@ -170,12 +179,10 @@
 					r[this.name] = [];
 					conditions++;
 				}
-
 				// Collect met conditions
 				if(this.getAttribute('data-condition') == 'required' && r[this.name] && this.checked){
 					met++;
 				}
-
 			});
 
 			//TODO: Add hook
@@ -190,7 +197,6 @@
 
 		function unlockNextStep(panel){
 
-			console.log("unlocking next panel ");
 			// Enable next button
 			panel.find(".next-step").removeAttr("disabled");
 
@@ -198,7 +204,7 @@
 			panel.next().removeClass('locked');
 
 			// unlock all next panels where conditions are met
-			for(var i=0; i < setup.steps.length; i++){
+			for(var i=0; i < setup.steps.length; i++){	
 				if(setup.steps[i].validates){
 					//console.log("#panel-" + (setup.steps[i].id + 1)  + " should be unloacked");
 					$("#panel-" + (setup.steps[i].id + 1) ).removeClass('locked');
