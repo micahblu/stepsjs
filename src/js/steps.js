@@ -1,4 +1,12 @@
-
+/**
+ * Steps js
+ *
+ * Build your form in steps with steps js :)
+ * @author : micahblu @ micahblu.com | github.com/micahblu
+ * @license http://opensource.org/licenses/MIT MIT License
+ * @version 0.0.4
+ * 
+ */
 (function($){
 	$.fn.steps = function(setup, callback) {
 
@@ -13,21 +21,152 @@
 		
 		source = this.html();
 
+		/**
+		 * conditionsMet step validation
+		 * @param  {jQuery object} panel
+		 * @return {Boolean}
+		 */
+		function conditionsMet(panel){
+
+			if(!panel){
+				return false;
+			}
+			//set our conditions and met vars
+			conditions = 0;
+			met = 0;
+
+			// check for conditions being met, if so allow continue button
+			panel.find('input, select, textarea').each(function(index){
+				
+				if(this.getAttribute('data-condition') === 'required'){ 
+					conditions++;
+					if($(this).val().trim() !== ""){
+						met++;
+					}
+				}
+			});
+
+			var r = [];
+			panel.find('input[type="radio"]').each(function(){
+
+				// Find condition to meet
+				if(this.getAttribute('data-condition') == 'required' && !r[this.name]){
+					r[this.name] = [];
+					conditions++;
+				}
+				// Collect met conditions
+				if(this.getAttribute('data-condition') == 'required' && r[this.name] && this.checked){
+					met++;
+				}
+			});
+
+			//TODO: Add hook
+			if(conditions === met){
+				setup.steps[panel.attr('id').replace(/[^0-9]+/, '')].validates = true;
+				return true;
+			}else{
+				setup.steps[panel.attr('id').replace(/[^0-9]+/, '')].validates = false;
+				return false;
+			}		
+		}
+
+		/**
+		 * unlockNextStep unlocks all validated subsequent steps
+		 * @param  {jQuery object} panel
+		 * @return {void}
+		 */
+		function unlockNextStep(panel){
+
+			// Enable next button
+			panel.find(".next-step").removeAttr("disabled");
+
+			// Unlock the next step..
+			panel.next().removeClass('locked');
+
+			// unlock all next panels where conditions are met
+			for(var i=0; i < setup.steps.length; i++){	
+				if(setup.steps[i].validates){
+					//console.log("#panel-" + (setup.steps[i].id + 1)  + " should be unloacked");
+					$("#panel-" + (setup.steps[i].id + 1) ).removeClass('locked');
+				}
+			}
+		}
+
+		/**
+		 * lockNextStep locks all subsequent panels
+		 * @param  {jQuery object} panel
+		 * @return {void}
+		 */
+		function lockNextStep(panel){
+			panel.find(".next-step").attr("disabled", "disabled");
+			panel.nextAll().addClass('locked');
+		}
+
+		/**
+		 * next collapses current panel and displays next
+		 * @param  {object} e
+		 * @return {void}
+		 */
+		function next(e){
+			$('.panel-body').addClass('collapse');
+			$(e.target).parents('.panel-container').next().find('.panel-body').removeClass('collapse');
+		}
+
+		/**
+		 * prev collapses current panel and displays previous								
+		 * @param  {object} e
+		 * @return {void}
+		 */
+		function prev(e){
+			$('.panel-body').addClass('collapse');
+			$(e.target).parents('.panel-container').prev().find('.panel-body').removeClass('collapse');
+		}
+
+		/**
+		 * has matches a pattern in a string
+		 * @param  {string}  term
+		 * @param  {string}  str
+		 * @return {Boolean}
+		 */
+		function has(term, str){
+			var patt = new RegExp(term);
+			return patt.test(str);
+		}
+
+
+		/*
+		Loop through steps in setup object 
+		add id to each and optionally populate handlebars content
+		 */
 		for(var i=0; i < setup.steps.length; i++){
-			// add id to each object
+
 			setup.steps[i].id = i;
-			setup.steps[i].step = $(setup.steps[i].content).html();
+
+			if(setup.steps[i].template && $(setup.steps[i].template)){
+				setup.steps[i].step = $(setup.steps[i].template).html();
+			}
 
 			if(i > 0) {
 				setup.steps[i].validates = false;
 			}
 		}
 
+		/**
+		 * content Handlebars helper that compiles nested templates
+		 * @param  {object} options
+		 * @return {HTMLString}
+		 */
 		Handlebars.registerHelper('content', function(options){
 			template = Handlebars.compile(this.step);
 			return template();
 		});
 
+		/**
+		 * list Handlebars helper that builds form fields from an object
+		 * @param  {object} context
+		 * @param  {object} options
+		 * @return {HTMLString}
+		 */
 		Handlebars.registerHelper('list', function(context, options){
 
 			var ret = '';
@@ -126,7 +265,6 @@
 
 			step = $(e.target).parents(".panel-container");
 
-
 			if(setup.steps[step.attr("id").replace(/[^0-9]+/, '')].onClickEvent){
 				//console.log(e.target);
 				setup.steps[step.attr("id").replace(/[^0-9]+/, '')].onClickEvent.apply(step, [e]);
@@ -149,96 +287,5 @@
 				}
 			}
 		});
-
-		function conditionsMet(panel){
-
-			if(!panel){
-				return false;
-			}
-			//set our conditions and met vars
-			conditions = 0;
-
-			met = 0;	
-
-			// check for conditions being met, if so allow continue button
-			panel.find('input, select, textarea').each(function(index){
-				
-				if(this.getAttribute('data-condition') === 'required'){ 
-					conditions++;
-					if($(this).val().trim() !== ""){
-						met++;
-					}
-				}
-			});
-
-			var r = [];
-			panel.find('input[type="radio"]').each(function(){
-
-				// Find condition to meet
-				if(this.getAttribute('data-condition') == 'required' && !r[this.name]){
-					r[this.name] = [];
-					conditions++;
-				}
-				// Collect met conditions
-				if(this.getAttribute('data-condition') == 'required' && r[this.name] && this.checked){
-					met++;
-				}
-			});
-
-			//TODO: Add hook
-			if(conditions === met){
-				setup.steps[panel.attr('id').replace(/[^0-9]+/, '')].validates = true;
-				return true;
-			}else{
-				setup.steps[panel.attr('id').replace(/[^0-9]+/, '')].validates = false;
-				return false;
-			}		
-		}
-
-		function unlockNextStep(panel){
-
-			// Enable next button
-			panel.find(".next-step").removeAttr("disabled");
-
-			// Unlock the next step..
-			panel.next().removeClass('locked');
-
-			// unlock all next panels where conditions are met
-			for(var i=0; i < setup.steps.length; i++){	
-				if(setup.steps[i].validates){
-					//console.log("#panel-" + (setup.steps[i].id + 1)  + " should be unloacked");
-					$("#panel-" + (setup.steps[i].id + 1) ).removeClass('locked');
-				}
-			}
-		}
-
-		function lockNextStep(panel){
-			// disable next step button
-			panel.find(".next-step").attr("disabled", "disabled");
-
-			//lock the next panel
-			panel.nextAll().addClass('locked');
-		}
-
-		function next(e){
-			// collapse this panel
-			$('.panel-body').addClass('collapse');
-
-			// expand the next panel
-			$(e.target).parents('.panel-container').next().find('.panel-body').removeClass('collapse');
-		}
-
-		function prev(e){
-			// collapse this panel
-			$('.panel-body').addClass('collapse');
-
-			// expand the next panel
-			$(e.target).parents('.panel-container').prev().find('.panel-body').removeClass('collapse');
-		}
-
-		function has(term, str){
-			var patt = new RegExp(term);
-			return patt.test(str);
-		}
 	};
 }(jQuery));
