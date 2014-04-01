@@ -11,13 +11,11 @@
 	$.fn.steps = function(setup, callback) {
 
 		var fields = {},
-				conditions,
 				step,
 				source,
 				template,
 				out,
 				parent,
-				met;
 		
 		source = this.html();
 
@@ -32,16 +30,38 @@
 				return false;
 			}
 			//set our conditions and met vars
-			conditions = 0;
-			met = 0;
+			var conditions = 0,
+					met = 0,
+					regex = '',
+					required;
 
 			// check for conditions being met, if so allow continue button
 			panel.find('input, select, textarea').each(function(index){
 				
-				if(this.getAttribute('data-condition') === 'required'){ 
+				required = this.getAttribute('data-condition');
+
+				if(required){ 
+
 					conditions++;
-					if($(this).val().trim() !== ""){
-						met++;
+
+					// check for validation hook
+					if(setup.onValidateField){
+						if(setup.onValidateField.apply(this, [this.name, this.value])){
+							met++;	
+						}
+					}else{
+
+						regex = this.getAttribute('data-expected');
+
+						if(regex){
+							var patt = new RegExp(regex);
+							if(patt.test( $(this).val().trim() )){
+								met++;
+							}
+						}
+						else if($(this).val().trim() !== ""){
+							met++;
+						}
 					}
 				}
 			});
@@ -86,7 +106,6 @@
 			// unlock all next panels where conditions are met
 			for(var i=0; i < setup.steps.length; i++){	
 				if(setup.steps[i].validates){
-					//console.log("#panel-" + (setup.steps[i].id + 1)  + " should be unloacked");
 					$("#panel-" + (setup.steps[i].id + 1) ).removeClass('locked');
 				}
 			}
