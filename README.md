@@ -1,8 +1,8 @@
 Stepsjs
 =======
 
-Build your form in steps
-=
+_Build your form in steps_
+
 
 Getting started
 =
