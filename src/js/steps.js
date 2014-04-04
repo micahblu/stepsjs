@@ -17,7 +17,7 @@
 				out,
 				parent,
 		
-		source = this.html();
+				source = this.html();
 
 		/**
 		 * conditionsMet step validation
@@ -225,6 +225,33 @@
 			return ret;
 		});
 
+		/**
+		 * Handlebars 'select' Heloper
+		 * @param  {object} context	
+		 * @return {Handlebars SafeString}
+		 */
+		Handlebars.registerHelper('select', function(context){
+
+			var ret = ''
+					options = setup.steps[parseInt(context.hash.step)].options;
+
+			if(context.hash.step){
+				ret += '<select';
+
+				for(var field in context.hash){
+					ret += ' ' + field + '=' + '"' + context.hash[field] + '"';
+				}
+				ret +='>';		
+				for(var i=0; i < options.length; i++){
+					console.log(options[i].name);
+					ret += '<option value="' + options[i].name + '">' + options[i].value + '</options>';
+				}
+				ret += '</select>';
+			}
+
+			return new Handlebars.SafeString(ret);
+		});	
+	
 		// compile handlebars template
 		template = Handlebars.compile(source);
 
