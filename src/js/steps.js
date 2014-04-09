@@ -18,8 +18,23 @@
 				parent,
 				source = this.html();
 
+
+		function evaluate(panel){
+			if(conditionsMet(panel)) {
+				if(setup.onPreLoadNext){
+					setup.onPreLoadNext.apply(null, [fields]);
+				}
+				unlockNextStep(panel);
+				if(setup.onPostLoadNext){
+					setup.onPostLoadNext.apply(null, [fields]);
+				}
+			}
+			else { 
+				lockNextStep(panel); 
+			}
+		}
+
 		/**
-		 * conditionsMet step validation
 		 * @param  {jQuery object} panel
 		 * @return {Boolean}
 		 */
@@ -261,14 +276,22 @@
 
 		// add callback hook for last step next button
 		$(out).find(".panel-container:last-child .next-step").on('click', function(e){
-			callback.apply(this, [fields]);	
+			callback.apply(this, [fields]);
 		})
+
+		// before proceeding evaluate all steps as they might have been pre-populated
+		$(out).find(".steps-container .panel-container").each(function(index){
+			panel = $(this);
+			evaluate(panel);
+		});
+		
 
 		// Unlock first step 
 		$(out).find(".steps-container .panel-container:first-child").removeClass('locked');
 
 		// add event listeners to form fields
 		$(out).find("input, select, textarea").each(function(index){
+
 			$(this).attr("data-group", $(this).parents(".panel-container").attr("id"));
 
 			$(this).on('keyup change', function(){
@@ -277,19 +300,7 @@
 				// add value to fields object
 				fields[this.name] = this.value;
 
-				if(conditionsMet(panel)) {
-
-					if(setup.onPreLoadNext){
-						setup.onPreLoadNext.apply(null, [fields]);
-					}
-					unlockNextStep(panel);
-					if(setup.onPostLoadNext){
-						setup.onPostLoadNext.apply(null, [fields]);
-					}
-				}
-				else { 
-					lockNextStep(panel); 
-				}
+				evaluate(panel);
 			});
 		});
 
