@@ -16,7 +16,6 @@
 				template,
 				out,
 				parent,
-		
 				source = this.html();
 
 		/**
@@ -195,17 +194,6 @@
 
 				switch(context[i].type){
 
-					case 'select': 
-						ret += "\t<select name=\"name\" data-condition=\""  + (context[i].required ? 'required' : '') + "\">\n";
-						if ( context[i].placeholder && context[i].placeholder.replace(/\s/, '') !== "" ) {
-							ret += "\t\t<option value=\"\">" + context[i].placeholder + "</option>\n";
-						}
-						for(var option in context[i].options){
-							ret += "\t\t<option name=\"" + option + "\">" + context[i].options[option] + "</option>\n";	
-						}
-						ret += "\t</select>\n";
-						break;
-
 					case 'text':
 						ret += "\t<input type=\"text\" name=\"" + context[i].name + "\" data-condition=\""  + (context[i].required ? 'required' : '') + "\" />\n";
 						break;
@@ -226,14 +214,16 @@
 		});
 
 		/**
-		 * Handlebars 'select' Heloper
+		 * Handlebars 'select' Helper
 		 * @param  {object} context	
 		 * @return {Handlebars SafeString}
 		 */
 		Handlebars.registerHelper('select', function(context){
 
-			var ret = ''
-					options = setup.steps[parseInt(context.hash.step)].options;
+			var ret = '',
+					index = parseInt(context.hash.step),
+					options = setup.steps[index].options,
+					defaultSelection = setup.steps[index].defaultSelection;
 
 			if(context.hash.step){
 				ret += '<select';
@@ -243,8 +233,7 @@
 				}
 				ret +='>';		
 				for(var i=0; i < options.length; i++){
-					console.log(options[i].name);
-					ret += '<option value="' + options[i].name + '">' + options[i].value + '</options>';
+					ret += '<option value="' + options[i].value + '" ' + (defaultSelection == options[i].value ? 'selected="selected"' : '') + '>' + options[i].label + '</options>';
 				}
 				ret += '</select>';
 			}
