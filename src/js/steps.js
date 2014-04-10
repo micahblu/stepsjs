@@ -8,6 +8,7 @@
  * 
  */
 (function($){
+
 	$.fn.steps = function(setup, callback) {
 
 		var fields = {},
@@ -18,19 +19,28 @@
 				parent,
 				source = this.html();
 
-
+		/**
+		 * evaluate evaluates validation conditions on panels and locks/unlocks steps accordingly	
+		 * @param  {jQuery Object} panel
+		 * @return {Boolean}
+		 */
 		function evaluate(panel){
 			if(conditionsMet(panel)) {
+				
 				if(setup.onPreLoadNext){
 					setup.onPreLoadNext.apply(null, [fields]);
 				}
+				
 				unlockNextStep(panel);
+
 				if(setup.onPostLoadNext){
 					setup.onPostLoadNext.apply(null, [fields]);
 				}
+				return true;
 			}
 			else { 
-				lockNextStep(panel); 
+				lockNextStep(panel);
+				return false;
 			}
 		}
 
@@ -51,7 +61,7 @@
 
 			// check for conditions being met, if so allow continue button
 			panel.find('input, select, textarea').each(function(index){
-				
+
 				required = this.getAttribute('data-condition');
 
 				if(required){ 
@@ -96,6 +106,7 @@
 
 			//TODO: Add hook
 			if(conditions === met){
+
 				setup.steps[panel.attr('id').replace(/[^0-9]+/, '')].validates = true;
 				return true;
 			}else{
@@ -103,6 +114,7 @@
 				return false;
 			}		
 		}
+
 
 		/**
 		 * unlockNextStep unlocks all validated subsequent steps
@@ -137,22 +149,31 @@
 
 		/**
 		 * next collapses current panel and displays next
-		 * @param  {object} e
+		 * @param  {object} panel
 		 * @return {void}
 		 */
-		function next(e){
-			$('.panel-body').addClass('collapse');
-			$(e.target).parents('.panel-container').next().find('.panel-body').removeClass('collapse');
+		function next(panel){
+
+			panel.find('.panel-body').addClass('collapse');
+			panel.next().find('.panel-body').removeClass('collapse');
+			
+			if(setup.onPanelLoaded){
+				setup.onPanelLoaded.apply();
+			}
 		}
 
 		/**
 		 * prev collapses current panel and displays previous								
-		 * @param  {object} e
+		 * @param  {object} panel
 		 * @return {void}
 		 */
-		function prev(e){
-			$('.panel-body').addClass('collapse');
-			$(e.target).parents('.panel-container').prev().find('.panel-body').removeClass('collapse');
+		function prev(panel){
+			panel.find('.panel-body').addClass('collapse');
+			panel.prev().find('.panel-body').removeClass('collapse');
+			
+			if(setup.onPanelLoaded){
+				setup.onPanelLoaded.apply();
+			}
 		}
 
 		/**
@@ -165,7 +186,6 @@
 			var patt = new RegExp(term);
 			return patt.test(str);
 		}
-
 
 		/*
 		Loop through steps in setup object 
@@ -277,12 +297,20 @@
 		// add callback hook for last step next button
 		$(out).find(".panel-container:last-child .next-step").on('click', function(e){
 			callback.apply(this, [fields]);
-		})
+		});
 
 		// before proceeding evaluate all steps as they might have been pre-populated
 		$(out).find(".steps-container .panel-container").each(function(index){
 			panel = $(this);
-			evaluate(panel);
+
+			var lastValidPanel = null;
+
+			if(evaluate(panel)){
+				lastValidPanel = panel;
+			}
+			if(lastValidPanel){
+				next(lastValidPanel);
+			}
 		});
 		
 
@@ -301,6 +329,7 @@
 				fields[this.name] = this.value;
 
 				evaluate(panel);
+
 			});
 		});
 
@@ -309,17 +338,17 @@
 		// Event Delegation
 		$(".steps-container").on('click', function(e){
 
-			step = $(e.target).parents(".panel-container");
+			panel = $(e.target).parents(".panel-container");
 
-			if(setup.steps[step.attr("id").replace(/[^0-9]+/, '')].onClickEvent){
+			if(setup.steps[panel.attr("id").replace(/[^0-9]+/, '')].onClickEvent){
 				//console.log(e.target);
-				setup.steps[step.attr("id").replace(/[^0-9]+/, '')].onClickEvent.apply(step, [e]);
+				setup.steps[panel.attr("id").replace(/[^0-9]+/, '')].onClickEvent.apply(step, [e]);
 			}
 
 			if(has("next-step", e.target.className)){
-				next(e);
+				next(panel);
 			} else if(has("prev-step", e.target.className)){
-				prev(e);
+				prev(panel);
 			}else if(has("panel-heading", e.target.className) || has("panel-title", e.target.className)){
 
 				if(!step.hasClass("locked")){
