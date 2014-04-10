@@ -351,13 +351,13 @@
 				prev(panel);
 			}else if(has("panel-heading", e.target.className) || has("panel-title", e.target.className)){
 
-				if(!step.hasClass("locked")){
-					if(step.find(".panel-body").hasClass("collapse")){
+				if(!panel.hasClass("locked")){
+					if(panel.find(".panel-body").hasClass("collapse")){
 						// collapse this panel
 						$('.panel-body').addClass('collapse');
 
 						// expand this panel
-						step.find(".panel-body").removeClass('collapse');
+						panel.find(".panel-body").removeClass('collapse');
 					}
 				}
 			}
