@@ -57,9 +57,10 @@
 		 * @param  {Array} params
 		 * @return {void}
 		 */
-		function broadcast(event, params){
+		function broadcast(_event, params){
+			//console.log(_event);
 			if( setup.subscriptions ){
-				var hooks = setup.subscriptions[event]
+				var hooks = setup.subscriptions[_event]
 
 				if(hooks){
 
@@ -71,7 +72,7 @@
 							var index = panel.attr('id').replace(/[^0-9]+/, ''),
 							template = setup.steps[index].template;
 
-							func.apply(null, [params[0], template]);
+							func.apply({event: _event}, [params[0], template]);
 						}
 					}
 				}
@@ -124,7 +125,6 @@
 					if(setup.treatments && setup.treatments.onValidateField){
 
 						if(applyTreatment('onValidateField', this)){
-							console.log('done treated');
 							met++;
 						}
 						/*
