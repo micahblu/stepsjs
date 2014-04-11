@@ -5,6 +5,18 @@
  * @author : micahblu @ micahblu.com | github.com/micahblu
  * @license http://opensource.org/licenses/MIT MIT License
  * @version 0.0.4
+ *
+ * Hooks
+ *  - onPanelValidate
+ *  - onBeforeLoadNext
+ *  - onAfterLoadNext
+ *  - onBeforeLoadPrev
+ *  - onAfterLoadPrev
+ *  - onClickEvent
+ *  - onPanelExpanded
+ *
+ * Filters
+ *  - onValidateField
  * 
  */
 (function($){
@@ -29,12 +41,7 @@
 				
 				unlockNextStep(panel);
 
-				if(setup.onPanelValidated){
-					var index = panel.attr('id').replace(/[^0-9]+/, ''),
-					template = setup.steps[index].template;
-
-					setup.onPanelValidated.apply(null, [fields, template]);
-				}
+				broadcast('onPanelValidated', [fields]);
 
 				return true;
 			}
@@ -45,6 +52,52 @@
 		}
 
 		/**
+		 * broadcast calls subscribed hook methods on specified events
+		 * @param  {String} event
+		 * @param  {Array} params
+		 * @return {void}
+		 */
+		function broadcast(event, params){
+			if( setup.subscriptions ){
+				var hooks = setup.subscriptions[event]
+
+				if(hooks){
+
+					for(var i=0, j = hooks.length; i < j; i++){
+
+						var func = setup[hooks[i]];
+						if(typeof func === 'function'){
+
+							var index = panel.attr('id').replace(/[^0-9]+/, ''),
+							template = setup.steps[index].template;
+
+							func.apply(null, [params[0], template]);
+						}
+					}
+				}
+			}
+		}
+ 
+		function applyTreatment(filterRef, filterEl){
+
+			var treatments = setup.treatments[filterRef],
+					ret;
+
+			if(treatments){
+
+				for(var i = 0, j = treatments.length; i < j; i++){
+					var func = setup[treatments[i]];
+
+					if(typeof func === 'function'){
+						//console.log(filterEl);
+						ret += func.apply(null, [filterEl]);
+					}
+				}
+			}
+		}
+
+		/**
+		 * conditionsMet
 		 * @param  {jQuery object} panel
 		 * @return {Boolean}
 		 */
@@ -67,12 +120,17 @@
 				if(required){ 
 
 					conditions++;
+				
+					if(setup.treatments && setup.treatments.onValidateField){
 
-					// check for validation hook
-					if(setup.onValidateField){
+						if(applyTreatment('onValidateField', this)){
+							console.log('done treated');
+							met++;
+						}
+						/*
 						if(setup.onValidateField.apply(this, [this.name, this.value])){
 							met++;	
-						}
+						}*/
 					}else{
 
 						regex = this.getAttribute('data-expected');
@@ -106,7 +164,6 @@
 
 			//TODO: Add hook
 			if(conditions === met){
-
 				setup.steps[panel.attr('id').replace(/[^0-9]+/, '')].validates = true;
 				return true;
 			}else{
@@ -114,7 +171,6 @@
 				return false;
 			}		
 		}
-
 
 		/**
 		 * unlockNextStep unlocks all validated subsequent steps
@@ -157,16 +213,12 @@
 			var index = panel.attr('id').replace(/[^0-9]+/, ''),
 					template = setup.steps[index].template;
 
-			if(setup.onBeforeLoadNext){
-				setup.onBeforeLoadNext.apply(null, [panel, template]);
-			}
+			broadcast('onBeforeLoadNext', [panel]);
 
 			panel.find('.panel-body').addClass('collapse');
 			panel.next().find('.panel-body').removeClass('collapse');
 			
-			if(setup.onAfterLoadNext){
-				setup.onAfterLoadNext.apply(null, [panel, template]);
-			}
+			broadcast('onAfterLoadNext', [panel]);
 		}
 
 		/**
@@ -175,17 +227,13 @@
 		 * @return {void}
 		 */
 		function prev(panel){
-			
-			if(setup.onBeforeLoadPrev){
-				setup.onBeforeLoadPrev.apply(panel);
-			}
+
+			broadcast('onBeforeLoadPrev', [panel]);
 
 			panel.find('.panel-body').addClass('collapse');
 			panel.prev().find('.panel-body').removeClass('collapse');
 			
-			if(setup.onAfterLoadPrev){
-				setup.onAfterLoadPrev.apply(panel);
-			}
+			broadcast('onAfterLoadPrev', [panel]);
 		}
 
 		/**
@@ -335,6 +383,7 @@
 			$(this).attr("data-group", $(this).parents(".panel-container").attr("id"));
 
 			$(this).on('keyup change', function(){
+			
 				panel = $(this).parents('.panel-container');
 
 				// add value to fields object
@@ -352,10 +401,7 @@
 
 			panel = $(e.target).parents(".panel-container");
 
-			if(setup.steps[panel.attr("id").replace(/[^0-9]+/, '')].onClickEvent){
-				//console.log(e.target);
-				setup.steps[panel.attr("id").replace(/[^0-9]+/, '')].onClickEvent.apply(step, [e]);
-			}
+			broadcast('onClickEvent', [e]);
 
 			if(has("next-step", e.target.className)){
 				next(panel);
@@ -370,6 +416,8 @@
 
 						// expand this panel
 						panel.find(".panel-body").removeClass('collapse');
+
+						broadcast('onPanelExpanded', [panel]);
 					}
 				}
 			}
