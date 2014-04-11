@@ -27,18 +27,18 @@
 		function evaluate(panel){
 			if(conditionsMet(panel)) {
 				
-				if(setup.onPreLoadNext){
-					setup.onPreLoadNext.apply(null, [fields]);
-				}
-				
 				unlockNextStep(panel);
 
-				if(setup.onPostLoadNext){
-					setup.onPostLoadNext.apply(null, [fields]);
+				if(setup.onPanelValidated){
+					var index = panel.attr('id').replace(/[^0-9]+/, ''),
+					template = setup.steps[index].template;
+
+					setup.onPanelValidated.apply(null, [fields, template]);
 				}
+
 				return true;
 			}
-			else { 
+			else {
 				lockNextStep(panel);
 				return false;
 			}
@@ -154,11 +154,18 @@
 		 */
 		function next(panel){
 
+			var index = panel.attr('id').replace(/[^0-9]+/, ''),
+					template = setup.steps[index].template;
+
+			if(setup.onBeforeLoadNext){
+				setup.onBeforeLoadNext.apply(null, [panel, template]);
+			}
+
 			panel.find('.panel-body').addClass('collapse');
 			panel.next().find('.panel-body').removeClass('collapse');
 			
-			if(setup.onPanelLoaded){
-				setup.onPanelLoaded.apply();
+			if(setup.onAfterLoadNext){
+				setup.onAfterLoadNext.apply(null, [panel, template]);
 			}
 		}
 
@@ -168,11 +175,16 @@
 		 * @return {void}
 		 */
 		function prev(panel){
+			
+			if(setup.onBeforeLoadPrev){
+				setup.onBeforeLoadPrev.apply(panel);
+			}
+
 			panel.find('.panel-body').addClass('collapse');
 			panel.prev().find('.panel-body').removeClass('collapse');
 			
-			if(setup.onPanelLoaded){
-				setup.onPanelLoaded.apply();
+			if(setup.onAfterLoadPrev){
+				setup.onAfterLoadPrev.apply(panel);
 			}
 		}
 
@@ -209,7 +221,7 @@
 		 * @param  {object} options
 		 * @return {HTMLString}
 		 */
-		Handlebars.registerHelper('content', function(options){
+		Handlebars.registerHelper('content', function(context, options){
 			template = Handlebars.compile(this.step);
 			return template();
 		});
