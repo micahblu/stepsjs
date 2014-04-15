@@ -68,7 +68,7 @@
 
 						var func = setup[hooks[i]];
 						if(typeof func === 'function'){
-
+							//console.log(params[i]);
 							var index = panel.attr('id').replace(/[^0-9]+/, ''),
 							template = setup.steps[index].template;
 
@@ -247,40 +247,23 @@
 			return patt.test(str);
 		}
 
-		/*
-		Loop through steps in setup object 
-		add id to each and optionally populate handlebars content
-		 */
-		for(var i=0; i < setup.steps.length; i++){
-
-			setup.steps[i].id = i;
-
-			if(setup.steps[i].template && $(setup.steps[i].template)){
-				setup.steps[i].step = $(setup.steps[i].template).html();
-			}
-
-			if(i > 0) {
-				setup.steps[i].validates = false;
-			}
-		}
-
 		/**
 		 * content Handlebars helper that compiles nested templates
 		 * @param  {object} options
 		 * @return {HTMLString}
-		 */
+		 
 		Handlebars.registerHelper('content', function(context, options){
 			template = Handlebars.compile(this.step);
 			return template();
-		});
+		});*/
 
 		/**
 		 * list Handlebars helper that builds form fields from an object
 		 * @param  {object} context
 		 * @param  {object} options
 		 * @return {HTMLString}
-		 */
-		Handlebars.registerHelper('list', function(context, options){
+		 
+		Handlebars.registerHelper('fields', function(context, options){
 
 			var ret = '';
 			for(var i=0, j=context.length; i<j; i++){
@@ -306,6 +289,9 @@
 				ret += "</p>";
 			}
 			return ret;
+		});*/
+		Handlebars.registerHelper('list', function(context, options){
+			console.log(context);
 		});
 
 		/**
@@ -317,7 +303,7 @@
 
 			var ret = '',
 					index = parseInt(context.hash.step),
-					options = setup.steps[index].options,
+					options = setup.steps[index].context.options,
 					defaultSelection = setup.steps[index].defaultSelection;
 
 			if(context.hash.step){
@@ -334,13 +320,41 @@
 			}
 
 			return new Handlebars.SafeString(ret);
-		});	
+		});		
+
+		/*
+		Loop through steps in setup object 
+		add id to each and optionally populate handlebars content
+		 */
+		setup.panel = '';
+		for(var i=0; i < setup.steps.length; i++){
+
+			setup.steps[i].id = i;
+
+			if(setup.steps[i].template && $(setup.steps[i].template)){
+				setup.steps[i].step = $(setup.steps[i].template).html();
+
+				//console.log(setup.steps[i].step);
+				template = Handlebars.compile(setup.steps[i].step);
+
+				setup.steps[i].panelContent =  new Handlebars.SafeString(template(setup.steps[i].context));
+				console.log(setup.steps[i]);
+				console.log(setup.steps[i].panelContent);
+				//console.log(setup.content);
+			}
+
+			if(i > 0) {
+				setup.steps[i].validates = false;
+			}
+		}
 	
 		// compile handlebars template
 		template = Handlebars.compile(source);
 
 		// wrap out outbound content in a div used for jQuery
 		out = document.createElement('div');
+
+		//console.log(setup);
 
 		// append templated output to our wrapper div
 		$(out).append(template(setup));
