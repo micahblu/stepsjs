@@ -58,7 +58,7 @@
 		 * @return {void}
 		 */
 		function broadcast(_event, params){
-			//console.log(_event);
+
 			if( setup.subscriptions ){
 				var hooks = setup.subscriptions[_event]
 
@@ -68,7 +68,7 @@
 
 						var func = setup[hooks[i]];
 						if(typeof func === 'function'){
-							//console.log(params[i]);
+
 							var index = panel.attr('id').replace(/[^0-9]+/, ''),
 							template = setup.steps[index].template;
 
@@ -90,7 +90,6 @@
 					var func = setup[treatments[i]];
 
 					if(typeof func === 'function'){
-						//console.log(filterEl);
 						ret += func.apply(null, [filterEl]);
 					}
 				}
@@ -127,10 +126,7 @@
 						if(applyTreatment('onValidateField', this)){
 							met++;
 						}
-						/*
-						if(setup.onValidateField.apply(this, [this.name, this.value])){
-							met++;	
-						}*/
+
 					}else{
 
 						regex = this.getAttribute('data-expected');
@@ -248,53 +244,6 @@
 		}
 
 		/**
-		 * content Handlebars helper that compiles nested templates
-		 * @param  {object} options
-		 * @return {HTMLString}
-		 
-		Handlebars.registerHelper('content', function(context, options){
-			template = Handlebars.compile(this.step);
-			return template();
-		});*/
-
-		/**
-		 * list Handlebars helper that builds form fields from an object
-		 * @param  {object} context
-		 * @param  {object} options
-		 * @return {HTMLString}
-		 
-		Handlebars.registerHelper('fields', function(context, options){
-
-			var ret = '';
-			for(var i=0, j=context.length; i<j; i++){
-
-				ret +=	"\n<p>\n\t<label>" + context[i].label + "</label>\n";
-
-				switch(context[i].type){
-
-					case 'text':
-						ret += "\t<input type=\"text\" name=\"" + context[i].name + "\" data-condition=\""  + (context[i].required ? 'required' : '') + "\" />\n";
-						break;
-
-					case 'radio':
-						for(var option in context[i].options){
-							ret += "\t<input type=\"radio\" name=\"" + context[i].name + "\" data-condition=\""  + (context[i].required ? 'required' : '') + "\" /> " + context[i].options[option] + "\n";
-						}
-						break;
-
-					case 'textarea':
-						ret += "\t<textarea name=\"" + context[i].name + "\" data-condition=\""  + (context[i].required ? 'required' : '') + "\"></textarea>\n"
-						break;
-				}
-				ret += "</p>";
-			}
-			return ret;
-		});*/
-		Handlebars.registerHelper('list', function(context, options){
-			console.log(context);
-		});
-
-		/**
 		 * Handlebars 'select' Helper
 		 * @param  {object} context	
 		 * @return {Handlebars SafeString}
@@ -332,15 +281,12 @@
 			setup.steps[i].id = i;
 
 			if(setup.steps[i].template && $(setup.steps[i].template)){
+
 				setup.steps[i].step = $(setup.steps[i].template).html();
 
-				//console.log(setup.steps[i].step);
 				template = Handlebars.compile(setup.steps[i].step);
 
 				setup.steps[i].panelContent =  new Handlebars.SafeString(template(setup.steps[i].context));
-				console.log(setup.steps[i]);
-				console.log(setup.steps[i].panelContent);
-				//console.log(setup.content);
 			}
 
 			if(i > 0) {
