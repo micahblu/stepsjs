@@ -271,7 +271,7 @@
 			var ret = '',
 					index = parseInt(context.hash.step),
 					options = setup.steps[index].context.options,
-					defaultSelection = setup.steps[index].defaultSelection;
+					defaultSelection = setup.steps[index].context.defaultSelection;
 
 			if(context.hash.step){
 				ret += '<select';
