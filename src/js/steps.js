@@ -53,7 +53,7 @@
 
 		/**
 		 * broadcast calls subscribed hook methods on specified events
-		 * @param  {String} event
+		 * @param  {String} _event
 		 * @param  {Array} params
 		 * @return {void}
 		 */
@@ -88,12 +88,17 @@
 
 				for(var i = 0, j = treatments.length; i < j; i++){
 					var func = setup[treatments[i]];
-
 					if(typeof func === 'function'){
-						ret += func.apply(null, [filterEl]);
+						var response = func.apply({event: filterRef}, [filterEl]);
+						if(typeof response === 'string'){
+							ret += response;
+						}else{
+							ret = response;
+						}
 					}
 				}
 			}
+			return ret;
 		}
 
 		/**
@@ -110,7 +115,8 @@
 			var conditions = 0,
 					met = 0,
 					regex = '',
-					required;
+					required,
+					handler;
 
 			// check for conditions being met, if so allow continue button
 			panel.find('input, select, textarea').each(function(index){
@@ -120,25 +126,37 @@
 				if(required){ 
 
 					conditions++;
-				
-					if(setup.treatments && setup.treatments.onValidateField){
 
+					if(setup.treatments && setup.treatments.onValidateField){	
 						if(applyTreatment('onValidateField', this)){
 							met++;
 						}
-
 					}else{
 
-						regex = this.getAttribute('data-expected');
+						handler = this.getAttribute('data-validator');
 
-						if(regex){
-							var patt = new RegExp(regex);
-							if(patt.test( $(this).val().trim() )){
-								met++;
+						if(handler){
+							if(!setup[handler]){
+								console.log('[Stepsjs Alert]: A custom validation handler was defined for "' + this.name + '" but no handler method was declared in the configuration object');
+							}else{
+								if(setup[handler].apply(null, [this])){
+									met++;
+								}
 							}
 						}
-						else if($(this).val().trim() !== ""){
-							met++;
+						// No custom handler defined, rely on data-expected attribute for validation
+						else{
+							regex = this.getAttribute('data-expected');
+
+							if(regex){
+								var patt = new RegExp(regex);
+								if(patt.test( $(this).val().trim() )){
+									met++;
+								}
+							}
+							else if($(this).val().trim() !== ""){
+								met++;
+							}
 						}
 					}
 				}
@@ -269,7 +287,7 @@
 			}
 
 			return new Handlebars.SafeString(ret);
-		});		
+		});
 
 		/*
 		Loop through steps in setup object 
@@ -348,6 +366,8 @@
 
 				// add value to fields object
 				fields[this.name] = this.value;
+
+				broadcast('onFieldChange', [fields]);
 
 				evaluate(panel);
 
