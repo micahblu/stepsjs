@@ -25,11 +25,11 @@
 
 		var fields = {},
 				step,
-				source,
 				template,
 				out,
 				parent,
-				source = this.html();
+				container = this;
+
 
 		/**
 		 * evaluate evaluates validation conditions on panels and locks/unlocks steps accordingly	
@@ -37,8 +37,9 @@
 		 * @return {Boolean}
 		 */
 		function evaluate(panel){
+
 			if(conditionsMet(panel)) {
-				
+
 				unlockNextStep(panel);
 
 				broadcast('onPanelValidated', [fields]);
@@ -70,9 +71,21 @@
 						if(typeof func === 'function'){
 
 							var index = panel.attr('id').replace(/[^0-9]+/, ''),
-							template = setup.steps[index].template;
+							stepslug = setup.steps[index].name;
 
-							func.apply({event: _event}, [params[0], template]);
+							request = func.apply({event: _event}, [params[0], stepslug]);
+
+							if(request && request.done){
+								request.done(function(data){
+									console.log(data);
+									var html = setup.steps[2].template.render(data);
+									$("#panel-2").find('.panel-body').html(html);
+
+								});
+							}else{
+								
+							}
+
 						}
 					}
 				}
@@ -243,10 +256,9 @@
 		function prev(panel){
 
 			broadcast('onBeforeLoadPrev', [panel]);
-
 			panel.find('.panel-body').addClass('collapse');
+
 			panel.prev().find('.panel-body').removeClass('collapse');
-			
 			broadcast('onAfterLoadPrev', [panel]);
 		}
 
@@ -293,32 +305,49 @@
 		Loop through steps in setup object 
 		add id to each and optionally populate handlebars content
 		 */
-		setup.panel = '';
-		for(var i=0; i < setup.steps.length; i++){
+		// build the steps
+		for(var i=0, j = setup.steps.length; i < j; i++){
+
+			if(typeof setup.steps[i] !== 'object'){
+				continue;
+			} 
+
+			var stepTemplate;
 
 			setup.steps[i].id = i;
 
-			if(setup.steps[i].template && $(setup.steps[i].template)){
+			// Based on template syntax look for either in document handlebars template or
+			// or load from an already loaded external template file  
+
+			if(/#/.test(setup.steps[i].template)){
 
 				setup.steps[i].step = $(setup.steps[i].template).html();
 
-				template = Handlebars.compile(setup.steps[i].step);
+				stepTemplate = Handlebars.compile(setup.steps[i].step);
+				
+				setup.steps[i].panelContent = new Handlebars.SafeString(stepTemplate(setup.steps[i].context));
+			
+			}else{
 
-				setup.steps[i].panelContent =  new Handlebars.SafeString(template(setup.steps[i].context));
+				stepTemplate = setup.steps[i].template.render;
+
+				setup.steps[i].panelContent = new Handlebars.SafeString(stepTemplate(setup.steps[i].context));
 			}
 
 			if(i > 0) {
 				setup.steps[i].validates = false;
 			}
 		}
-	
-		// compile handlebars template
-		template = Handlebars.compile(source);
+
+		// Either compile in document template or assign the precomiled template to the template var
+		if(/#/.test(setup.steps.containerTemplate)){
+			template = Handlebars.compile($(containerTemplate).html());
+		}else{
+			template = setup.containerTemplate.render;
+		}
 
 		// wrap out outbound content in a div used for jQuery
 		out = document.createElement('div');
-
-		//console.log(setup);
 
 		// append templated output to our wrapper div
 		$(out).append(template(setup));
@@ -337,6 +366,7 @@
 			callback.apply(this, [fields]);
 		});
 
+		
 		// before proceeding evaluate all steps as they might have been pre-populated
 		$(out).find(".steps-container .panel-container").each(function(index){
 			panel = $(this);
@@ -344,15 +374,13 @@
 			var lastValidPanel = null;
 
 			if(evaluate(panel)){
-				lastValidPanel = panel;
+				next(panel);
+			}else{
+				return false;
 			}
-			if(lastValidPanel){
-				next(lastValidPanel);
-			}
+			
 		});
-		
-
-		// Unlock first step 
+				// Unlock first step 
 		$(out).find(".steps-container .panel-container:first-child").removeClass('locked');
 
 		// add event listeners to form fields
@@ -374,7 +402,7 @@
 			});
 		});
 
-		this.after(out);
+		this.html(out);
 
 		// Event Delegation
 		$(".steps-container").on('click', function(e){
@@ -391,6 +419,7 @@
 
 				if(!panel.hasClass("locked")){
 					if(panel.find(".panel-body").hasClass("collapse")){
+
 						// collapse this panel
 						$('.panel-body').addClass('collapse');
 
