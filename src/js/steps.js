@@ -20,6 +20,8 @@
  * 
  */
 (function($){
+	
+	'use strict';
 
 	$.fn.steps = function(setup, callback) {
 
@@ -39,11 +41,9 @@
 
 			setup: {},
 
-			self: {},
-
 			init: function(setup, container){
 
-				self = this;
+				var self = this;
 
 				self.regiesterHelpers();
 
@@ -57,7 +57,7 @@
 
 				self.setupPanels();
 
-				self.applyBehaviours();
+				self.applyBehaviors();
 
 			},
 
@@ -99,12 +99,16 @@
 			 * @return {Boolean}
 			 */
 			evaluate: function(panel){
-
+				var self = this;
 				if(self.conditionsMet(panel)) {
 
 					self.unlockNextStep(panel);
+								
+					var send = $.extend({
+						values: self.fields
+					}, self.commonBroadcastResponse(panel));
 
-					self.broadcast('onPanelValidated', [self.fields]);
+					self.broadcast('onPanelValidated', send);
 
 					return true;
 				}
@@ -120,10 +124,12 @@
 			 * @param  {Array} params
 			 * @return {void}
 			 */
-			broadcast: function(_event, params){
+			broadcast: function(_event, _with){
 
-				console.log('Broadcast: ' + _event);
-				console.log(params);
+				//console.log('Broadcast: ' + _event);
+				//console.log(_with	);
+				//
+				var self = this;
 
 				if( self.setup.subscriptions ){
 					var hooks = self.setup.subscriptions[_event]
@@ -133,16 +139,14 @@
 						for(var i=0, j = hooks.length; i < j; i++){
 
 							var func = self.setup[hooks[i]];
+
 							if(typeof func === 'function'){
 
-								// TODO !! where's panel declared?
-								var index = panel.attr('id').replace(/[^0-9]+/, ''),
-								
-								stepslug = self.setup.steps[index].name;
+								// check to see if a jQuery panel element is passed
 
-								response = func.apply({event: _event}, [params[0], stepslug]);
+								var response = func.apply({event: _event}, [ _with ] );
 
-								// response may be a jQuery promise if so deal with input
+								// response may be a jQuery promise if so deal with it
 								if(response && response.then){
 
 									response.done(function(data){
@@ -155,14 +159,10 @@
 
 											var html = self.setup.steps[panelIndex].template.render(data.context);
 											
-											$(panelID).find('.panel-body').html(html);
+											$(panelID).find('.panel-body').prepend(html);
 										}
-
 									});
-								}else{
-									
 								}
-
 							}
 						}
 					}
@@ -170,8 +170,8 @@
 			},
 	 
 			applyTreatment: function(filterRef, filterEl){
-
-				var treatments = this.setup.treatments[filterRef],
+				var self = this;
+				var treatments = self.setup.treatments[filterRef],
 						ret;
 
 				if(treatments){
@@ -198,9 +198,10 @@
 			 */
 			conditionsMet: function(panel){
 
-				if(!panel){
+				if(!panel){	
 					return false;
 				}
+				var self = this;
 				//set our conditions and met vars
 				var conditions = 0,
 						met = 0,
@@ -237,6 +238,7 @@
 							}
 							// No custom handler defined, rely on data-expected attribute for validation
 							else{
+
 								regex = this.getAttribute('data-expected');
 
 								if(regex){
@@ -283,7 +285,7 @@
 			 * @return {void}
 			 */
 			unlockNextStep: function(panel){
-
+				var self = this;
 				// Enable next button
 				panel.find(".next-step").removeAttr("disabled");
 
@@ -308,23 +310,33 @@
 				panel.nextAll().addClass('locked');
 			},
 
+
+			commonBroadcastResponse: function(panel){
+				var self = this;
+				var index = panel.attr('id').replace(/[^0-9]+/, '');
+				var stepslug = self.setup.steps[index].name;
+
+				return  {
+					panel: panel,
+					step: stepslug
+				}
+			},
+
 			/**
 			 * next collapses current panel and displays next
 			 * @param  {object} panel
 			 * @return {void}
 			 */
 			next: function(panel){
+				var self = this;
 
-				var index = panel.attr('id').replace(/[^0-9]+/, ''),
-						template = setup.steps[index].template;
-
-				this.broadcast('onBeforeLoadNext', [panel]);
+				self.broadcast('onBeforeLoadNext', self.commonBroadcastResponse(panel));
 
 				panel.find('.panel-body').addClass('collapse');
 
 				panel.next().find('.panel-body').removeClass('collapse');
 				
-				this.broadcast('onAfterLoadNext', [panel]);
+				self.broadcast('onAfterLoadNext', self.commonBroadcastResponse(panel));
 			},
 
 			/**
@@ -333,12 +345,15 @@
 			 * @return {void}
 			 */
 			prev: function(panel){
+				var self = this;
 
-				this.broadcast('onBeforeLoadPrev', [panel]);
+				self.broadcast('onBeforeLoadPrev', self.commonBroadcastResponse(panel));
+
 				panel.find('.panel-body').addClass('collapse');
 
 				panel.prev().find('.panel-body').removeClass('collapse');
-				this.broadcast('onAfterLoadPrev', [panel]);
+
+				self.broadcast('onAfterLoadPrev', self.commonBroadcastResponse(panel));
 			},
 
 			/**
@@ -354,10 +369,11 @@
 
 			
 			prepareSteps: function(){
+				var self = this;
 				/*
 				Loop through steps in setup object 
 				add id to each and optionally populate handlebars content
-				 */
+				*/
 				// build the steps
 				for(var i=0, j = this.setup.steps.length; i < j; i++){
 
@@ -367,35 +383,36 @@
 
 					var stepTemplate;
 
-					this.setup.steps[i].id = i;
+					self.setup.steps[i].id = i;
 
 					// Based on template syntax look for either in document handlebars template or
 					// or load from an already loaded external template file  
 
-					if(/#/.test(this.setup.steps[i].template)){
+					if(/#/.test(self.setup.steps[i].template)){
 
-						this.setup.steps[i].step = $(this.setup.steps[i].template).html();
+						self.setup.steps[i].step = $(self.setup.steps[i].template).html();
 
-						stepTemplate = Handlebars.compile(this.setup.steps[i].step);
+						stepTemplate = Handlebars.compile(self.setup.steps[i].step);
 						
-						this.setup.steps[i].panelContent = new Handlebars.SafeString(stepTemplate(this.setup.steps[i].context));
+						self.setup.steps[i].panelContent = new Handlebars.SafeString(stepTemplate(self.setup.steps[i].context));
 					
 					}else{
 
-						stepTemplate = this.setup.steps[i].template.render;
+						stepTemplate = self.setup.steps[i].template.render;
 
-						this.setup.steps[i].panelContent = new Handlebars.SafeString(stepTemplate(this.setup.steps[i].context));
+						self.setup.steps[i].panelContent = new Handlebars.SafeString(stepTemplate(self.setup.steps[i].context));
 
 					}
 
 					if(i > 0) {
-						this.setup.steps[i].validates = false;
+						self.setup.steps[i].validates = false;
 					}
 				}
 			},
 
 			renderTemplate: function(){
-
+				var self = this,
+						template = '';
 				// Either compile in document template or assign the precomiled template to the template var
 				if(/#/.test(this.setup.steps.containerTemplate)){
 					template = Handlebars.compile($(containerTemplate).html());
@@ -407,8 +424,8 @@
 			},
 
 
-
 			setupPanels: function(){
+				var self = this;
 
 				// by default make all next button's disabled
 				self.container.find(".next-step").attr("disabled", "disabled");
@@ -427,9 +444,7 @@
 				// before proceeding evaluate all steps as they might have been pre-populated
 				self.container.find(".steps-container .panel-container").each(function(index){
 
-					//console.log(self);
-
-					panel = $(this);
+					var panel = $(this);
 					var lastValidPanel = null;
 
 					if(self.evaluate(panel)){
@@ -443,29 +458,54 @@
 				self.container.find(".steps-container .panel-container:first-child").removeClass('locked');
 			},
 
-			applyBehaviours: function(){
+			captureChangeEvents: function(){
 				var self = this;
-				self.container.find("input, select, textarea").each(function(){
-					$(this).on('keyup change', function(){
 
+				self.container.on('keyup change', 'input, select, textarea', function(e){
+					console.log(e);
+					var panel = $(this).parents('.panel-container');
+
+					// add value to fields object
+					self.fields[this.name] = this.value;
+
+					self.broadcast('onFieldChange', { fields: self.fields });
+
+					self.evaluate(panel);
+
+				});
+				/*
+				self.container.find("input, select, textarea").each(function(){
+					console.log('foo');
+					console.log(this);
+					$(this).on('keyup change', function(e){
+						console.log(e);
 						var panel = $(this).parents('.panel-container');
 
 						// add value to fields object
 						self.fields[this.name] = this.value;
 
-						self.broadcast('onFieldChange', [self.fields]);
+						self.broadcast('onFieldChange', { fields: self.fields });
 
 						self.evaluate(panel);
 
 					});
-				});
+				});*/
+			},
 
+			captureClickEvents: function(){
+				var self = this;
 				// Event Delegation
 				self.container.on('click', function(e){
 
+					console.log(e.target);
+
 					var panel = $(e.target).parents(".panel-container");
 
-					self.broadcast('onClickEvent', [e]);
+					var send = $.extend({
+						e: e
+					}, self.commonBroadcastResponse(panel));
+
+					self.broadcast('onClickEvent', send);
 
 					if(self.has("next-step", e.target.className)){
 						self.next(panel);
@@ -481,11 +521,20 @@
 								// expand this panel
 								panel.find(".panel-body").removeClass('collapse');
 
-								self.broadcast('onPanelExpanded', [panel]);
+								self.broadcast('onPanelExpanded', { panel: panel });
 							}
 						}
 					}
 				});
+			},
+
+			applyBehaviors: function(){
+				var self = this;
+
+				self.captureChangeEvents();
+	
+				self.captureClickEvents();
+				
 			}
 		}
 
