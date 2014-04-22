@@ -7,7 +7,7 @@
  * @version 0.0.4
  *
  * Hooks
- *  - onPanelValidate
+ *  - onPanelValidated
  *  - onBeforeLoadNext
  *  - onAfterLoadNext
  *  - onBeforeLoadPrev
@@ -23,9 +23,22 @@
 	
 	'use strict';
 
-	$.fn.steps = function(setup, callback) {
+	var stepsjs = {};
 
-		var stepsjs = {
+	$.steps = function( func, param ){
+
+		var allowed = ['goto'];
+		if(allowed.has(func)){
+			stepsjs[func].apply(stepsjs, [param]);
+		}else{
+			console.log('Method not found');
+		}
+	
+	};
+
+	$.fn.steps = function( options ) {
+
+		stepsjs = {
 
 			fields: {},
 			
@@ -41,15 +54,15 @@
 
 			setup: {},
 
-			init: function(setup, container){
+			init: function( options ){
 
 				var self = this;
 
 				self.regiesterHelpers();
 
-				self.container = $(container);
+				self.container = $(options.container);
 
-				self.setup = setup;
+				self.setup = options;
 
 				self.prepareSteps();
 
@@ -58,6 +71,22 @@
 				self.setupPanels();
 
 				self.applyBehaviors();
+
+			},
+
+			goto: function(step){
+				var self = this;
+
+				// panel index will be at a panel index of minus 2
+				// this is due to the fact steps start @ 1 and panel id's start at 0 
+				// and becuase next is implemented for the behaviour so the panel before the 
+				// requested panel needs to be passed for reference
+				var panelIndex = (parseInt(step.replace("step-", "")) - 1);
+				//console.log('panel for step ' + step.replace("step-", "") + ' is: ' + '#panel-' + panelIndex);
+				console.log("#panel" + panelIndex);
+				var panel = $("#panel-" + panelIndex);
+
+				self.next(panel);
 
 			},
 
@@ -313,12 +342,19 @@
 
 			commonBroadcastResponse: function(panel){
 				var self = this;
-				var index = panel.attr('id').replace(/[^0-9]+/, '');
-				var stepslug = self.setup.steps[index].name;
+				if(panel){
+					if(!panel.attr('id')){
+						console.log(panel);
+					}
+					var index = panel.attr('id').replace(/[^0-9]+/, '');
+					var stepslug = self.setup.steps[index].name;
 
-				return  {
-					panel: panel,
-					step: stepslug
+					return {
+						panel: panel,
+						step: stepslug
+					}
+				}else{
+					console.log('panel undefined');
 				}
 			},
 
@@ -462,7 +498,7 @@
 				var self = this;
 
 				self.container.on('keyup change', 'input, select, textarea', function(e){
-					console.log(e);
+
 					var panel = $(this).parents('.panel-container');
 
 					// add value to fields object
@@ -473,31 +509,12 @@
 					self.evaluate(panel);
 
 				});
-				/*
-				self.container.find("input, select, textarea").each(function(){
-					console.log('foo');
-					console.log(this);
-					$(this).on('keyup change', function(e){
-						console.log(e);
-						var panel = $(this).parents('.panel-container');
-
-						// add value to fields object
-						self.fields[this.name] = this.value;
-
-						self.broadcast('onFieldChange', { fields: self.fields });
-
-						self.evaluate(panel);
-
-					});
-				});*/
 			},
 
 			captureClickEvents: function(){
 				var self = this;
 				// Event Delegation
 				self.container.on('click', function(e){
-
-					console.log(e.target);
 
 					var panel = $(e.target).parents(".panel-container");
 
@@ -538,8 +555,9 @@
 			}
 		}
 
-		return this.each(function(container){
-			stepsjs.init(setup, this);
+		return this.each(function(){
+				options.container = this;
+				stepsjs.init( options );			
     }); 
 
 	};
