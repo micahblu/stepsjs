@@ -28,6 +28,7 @@
 	$.steps = function( func, param ){
 
 		var allowed = ['goto'];
+
 		if(allowed.has(func)){
 			stepsjs[func].apply(stepsjs, [param]);
 		}else{
@@ -531,14 +532,16 @@
 					}else if(self.has("panel-heading", e.target.className) || self.has("panel-title", e.target.className)){
 
 						if(!panel.hasClass("locked")){
+
 							if(panel.find(".panel-body").hasClass("collapse")){
+							
 								// collapse this panel
 								$('.panel-body').addClass('collapse');
 
 								// expand this panel
 								panel.find(".panel-body").removeClass('collapse');
 
-								self.broadcast('onPanelExpanded', { panel: panel });
+								self.broadcast('onPanelExpanded', self.commonBroadcastResponse(panel));
 							}
 						}
 					}
