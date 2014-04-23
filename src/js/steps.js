@@ -473,11 +473,6 @@
 				// by default lock panels
 				self.container.find(".panel-container").addClass('locked');
 
-				// add callback hook for last step next button
-				self.container.find(".panel-container:last-child .next-step").on('click', function(e){
-					callback.apply(this, [self.fields]);
-				});
-
 				// before proceeding evaluate all steps as they might have been pre-populated
 				self.container.find(".steps-container .panel-container").each(function(index){
 
