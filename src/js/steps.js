@@ -84,10 +84,8 @@
 				// requested panel needs to be passed for reference
 				var panelIndex = (parseInt(step.replace("step-", "")) - 1);
 				//console.log('panel for step ' + step.replace("step-", "") + ' is: ' + '#panel-' + panelIndex);
-				console.log("#panel" + panelIndex);
-				var panel = $("#panel-" + panelIndex);
 
-				self.next(panel);
+				var panel = $("#panel-" + panelIndex);
 
 			},
 
@@ -99,6 +97,7 @@
 				 * @return {Handlebars SafeString}
 				 */
 				Handlebars.registerHelper('select', function(context){
+
 
 					var ret = '',
 							index = parseInt(context.hash.step),
