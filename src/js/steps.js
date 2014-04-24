@@ -87,6 +87,10 @@
 
 				var panel = $("#panel-" + panelIndex);
 
+				$('.panel-body').addClass('collapse');
+
+				panel.find('.panel-body').removeClass('collapse');
+
 			},
 
 			regiesterHelpers: function(){
@@ -97,7 +101,6 @@
 				 * @return {Handlebars SafeString}
 				 */
 				Handlebars.registerHelper('select', function(context){
-
 
 					var ret = '',
 							index = parseInt(context.hash.step),
@@ -188,7 +191,7 @@
 
 											var html = self.setup.steps[panelIndex].template.render(data.context);
 											
-											$(panelID).find('.panel-body').prepend(html);
+											$(panelID).find('.panel-content').html(html);
 										}
 									});
 								}
