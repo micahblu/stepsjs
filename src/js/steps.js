@@ -346,16 +346,17 @@
 			commonBroadcastResponse: function(panel){
 				var self = this;
 				if(panel){
-					if(!panel.attr('id')){
-						console.log(panel);
-					}
-					var index = panel.attr('id').replace(/[^0-9]+/, '');
-					var stepslug = self.setup.steps[index].name;
+					if(panel.attr('id')){
 
-					return {
-						panel: panel,
-						step: stepslug
+						var index = panel.attr('id').replace(/[^0-9]+/, '');
+						var stepslug = self.setup.steps[index].name;
+
+						return {
+							panel: panel,
+							step: stepslug
+						}
 					}
+					
 				}else{
 					console.log('panel undefined');
 				}
@@ -480,8 +481,9 @@
 
 					var panel = $(this);
 					var lastValidPanel = null;
+					var lastPanel = "panel-" + (self.setup.steps.length - 1);
 
-					if(self.evaluate(panel)){
+					if(self.evaluate(panel) && panel.attr('id') != lastPanel){
 						self.next(panel);
 					}else{
 						return false;
