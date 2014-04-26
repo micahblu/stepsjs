@@ -12,7 +12,9 @@
 
 		<h1>Stepsjs</h1>
 
-		<script type="text/x-handlebars" id="steps">
+		<div id="steps"></div>
+
+		<script type="text/x-handlebars" id="steps-wrapper">
 			<div class="steps-container">
 			{{#steps}}
 				<div id="panel-{{id}}" class="panel-container">
@@ -20,8 +22,10 @@
 						{{title}}
 					</div>
 
-					<div id="panel-body" class="panel-body {{class}}">
-						{{#list fields}}{{/list}}
+					<div class="panel-body {{class}}">
+						<div class="panel-content">
+						{{output}}
+						</div> 
 						<div class="step-form-controls">
 							<button class="button btn left prev-step">Back</button>
 							<button class="button btn left next-step">Continue</button>
@@ -31,109 +35,72 @@
 			{{/steps}}
 			</div>
 		</script>
+
+		<script type="text/x-handlebars" id="step-1">
+			<p>
+				<label for="name">Your name?</label>
+				<input name="name" type="text" placeholder="name" data-condition="required" />
+			</p>
+		</script>
+
+		<script type="text/x-handlebars" id="step-2">
+			<p>Your Gender</p>
+			<p>
+				<input name="gender" type="radio" value="male" /> Male
+			</p>
+			<p>
+				<input name="gender" type="radio" value="female" /> Female
+			</p>
+			<p>
+				<input name="gender" type="radio" value="dunno" /> I dunno
+			</p>
+
+		</script>
+
+		<script type="text/x-handlebars" id="step-3">
+			<p>
+				<label for="name">Favorite Activity</label>
+				<select name="favActivity">
+					<option value="">--Select Actvity--</option>
+					<option value="code">Writing Code</option>
+					<option value="outdoors">The Great Outdoors</option>
+					<option value="gemMining">Gem Mining</option>
+					<option value="bitMining">Bit Mining</option>
+				</select>
+			</p>
+		</script>
 	</div>
 
-	<script src="assets/js/vendor/jquery/dist/jquery.min.js"></script>
-	<script src="assets/js/vendor/handlebars/handlebars.min.js"></script>
-	<script src="assets/js/steps.min.js"></script>
+	<script src="assets/vendor/jquery/dist/jquery.min.js"></script>
+	<script src="assets/vendor/handlebars/handlebars.min.js"></script>
+	<script src="../src/js/steps.js"></script>
 
 	<script>
 
 	var setup = {
+
+		stepsTemplate: '#steps-wrapper',
+
 		steps: [
 			{
 				title: 'Step One',
-				class: '',
-
-				fields:[
-					{
-						label: "Choose an icon",
-						name: "icon",
-						type: "select",
-						options: {'tesla': 'Nikola Tesla', 'einstein': 'Albert Einstein', 'neuman': 'Jon Von Neumann', 'turing': 'Alan Turing'},
-						placeholder: 'Choose genius',
-						required: true,
-						classNames: "medium"
-					},
-					{
-						label: "Last Name",
-						name: "lname",
-						type: "text",
-						required: true,
-						classNames: "medium"
-					},
-					{
-						label: "Gender",
-						name: "gender",
-						type: "radio",
-						options: {'male': 'Male', 'female': 'Female'},
-						required: true,
-						classNames: "medium"
-					},
-
-					{
-						label: "Tell me why you're awesome",
-						name: "about-you",
-						type: "textarea",
-						required: true,
-						classNames: "medium"
-					}
-				]
+				name: 'step-1',
+				template: '#step-1'
 			},
 			{
 				title: 'Step Two',
-				class: 'collapse',
-
-				fields:[
-					{
-						label: "First Name",
-						name: "fname",
-						type: "text",
-						required: true,
-						expects: '',
-						id: 'fname',
-						classNames: "medium"
-					},
-					{
-						label: "Last Name",
-						name: "lname",
-						id: 'lname',
-						type: "text",
-						required: true,
-						classNames: "medium"
-					}
-				]
+				name: 'step-2',
+				template: '#step-2'
 			},
 			{
 				title: 'Step Three',
-				class: 'collapse',
-
-				fields:[
-					{
-						label: "First Name",
-						name: "fname",
-						type: "text",
-						required: true,
-						expects: '',
-						id: 'fname',
-						classNames: "medium"
-					},
-					{
-						label: "Last Name",
-						name: "lname",
-						id: 'lname',
-						type: "text",
-						required: true,
-						classNames: "medium"
-					}
-				]
+				name: 'step-3',
+				template: '#step-3'
 			}
 		]
 	};
 	
-	$("#steps").steps(setup, function(fields){
-		console.log(fields);
-	});
+	$("#steps").steps(setup);
 
 	</script>
 

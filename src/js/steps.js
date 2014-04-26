@@ -34,7 +34,6 @@
 		}else{
 			console.log('Method not found');
 		}
-	
 	};
 
 	$.fn.steps = function( options ) {
@@ -83,7 +82,6 @@
 				// and becuase next is implemented for the behaviour so the panel before the 
 				// requested panel needs to be passed for reference
 				var panelIndex = (parseInt(step.replace("step-", "")) - 1);
-				//console.log('panel for step ' + step.replace("step-", "") + ' is: ' + '#panel-' + panelIndex);
 
 				var panel = $("#panel-" + panelIndex);
 
@@ -209,7 +207,9 @@
 				if(treatments){
 
 					for(var i = 0, j = treatments.length; i < j; i++){
+						
 						var func = this.setup[treatments[i]];
+
 						if(typeof func === 'function'){
 							var response = func.apply({event: filterRef}, [filterEl]);
 							if(typeof response === 'string'){
@@ -427,20 +427,21 @@
 
 					// Based on template syntax look for either in document handlebars template or
 					// or load from an already loaded external template file  
-
+					
 					if(/#/.test(self.setup.steps[i].template)){
+
 
 						self.setup.steps[i].step = $(self.setup.steps[i].template).html();
 
 						stepTemplate = Handlebars.compile(self.setup.steps[i].step);
 						
-						self.setup.steps[i].panelContent = new Handlebars.SafeString(stepTemplate(self.setup.steps[i].context));
-					
+						self.setup.steps[i].output = new Handlebars.SafeString(stepTemplate(self.setup.steps[i].context));
+							
 					}else{
 
 						stepTemplate = self.setup.steps[i].template.render;
 
-						self.setup.steps[i].panelContent = new Handlebars.SafeString(stepTemplate(self.setup.steps[i].context));
+						self.setup.steps[i].output = new Handlebars.SafeString(stepTemplate(self.setup.steps[i].context));
 
 					}
 
@@ -452,20 +453,28 @@
 
 			renderTemplate: function(){
 				var self = this,
-						template = '';
+						template = '',
+						stepsTemplate = self.setup.stepsTemplate;
+
 				// Either compile in document template or assign the precomiled template to the template var
-				if(/#/.test(this.setup.steps.containerTemplate)){
-					template = Handlebars.compile($(containerTemplate).html());
+				if(/#/.test(stepsTemplate)){
+					template = Handlebars.compile($(stepsTemplate).html());
 				}else{
-					template = this.setup.containerTemplate.render;
+					template = stepsTemplate.render;
 				}
 				// append templated output to our wrapper div
-				$(self.container).html(template(this.setup));
+				$(self.container).html(template(self.setup));
 			},
 
 
 			setupPanels: function(){
 				var self = this;
+
+				console.log(self.container);
+
+				self.container.find('.panel-body').addClass('collapse');
+
+				self.container.find('.panel-container:first').find('.panel-body').removeClass('collapse');
 
 				// by default make all next button's disabled
 				self.container.find(".next-step").attr("disabled", "disabled");
