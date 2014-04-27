@@ -3,6 +3,7 @@ Stepsjs
 
 _Segment your form in valdiated sequential steps_
 
+![Stepsjs](/src/img/stepsjs-screenshot.png?raw=true "Stepsjs")
 
 ##Getting started
 
@@ -32,9 +33,9 @@ Assuming you have a server running on localhost and the stepsjs directory is acc
 
 ## What's going on here?
 
-Essentially the way stepsjs works is by using handlesbarsjs templates and a configuration object that populates the steps in a passed element designated via the jQuery selector.
+Essentially the way stepsjs works is by using handlesbarsjs templates and a configuration object that populates the steps within the passed element from the jQuery selector.
 
-Below is a working example (found in src/index.html) of a very simple setup of the handlebar templates used
+Below is a working example (found in src/index.html) of a very simple setup of the handlebarsjs templates used in the example build.
 
 ```html
 <div id="steps"></div>
