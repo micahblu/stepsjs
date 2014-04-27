@@ -1,6 +1,5 @@
 node_modules/
 .sass-cache/
 build/
-bower.json
 src/bower_components/
 .DS_Store
