@@ -1,16 +1,130 @@
 Stepsjs
 =======
 
-_Build your form in steps_
+_Segment your form in valdiated sequential steps_
 
 
-Getting started
-=
+##Getting started
 
-1. clone repo from https://github.com/micahblu/stepsjs.git
-2. `cd stepsjs`
-3. run `npm install` if you do not yet have npm (node package manager) you can install it from http://nodejs.org/
-4. `cd /src/js` then run `bower install` you can install bower with `npm install -g bower`. Find out more here: http://bower.info
-5. run 'grunt' from anywhere. You can install it with `npm install -g grunt-cli`
+__You will need Node, Bower and Grunt__
 
+Clone repo:
+
+    git clone git://github.com/micahblu/stepsjs.git
+
+cd into directory:
+
+    cd stepsjs
+
+Install Node dependencies:
+
+    npm install
+
+Intsall Bower dependencies:
+
+    cd src && bower install
+
+Run Grunt:
+
+    grunt
+
+Assuming you have a server running on localhost and the stepsjs directory is accessible you can view the example setup via: http://localhost/[pathtostepsjs]/stepsjs/build/
+
+## What's going on here?
+
+Essentially the way stepsjs works is by using handlesbarsjs templates and a configuration object that populates the steps in a passed element designated via the jQuery selector.
+
+Below is a working example (found in src/index.html) of a very simple setup of the handlebar templates used
+
+```html
+<div id="steps"></div>
+
+		<script type="text/x-handlebars" id="steps-wrapper">
+			<div class="steps-container">
+			{{#steps}}
+				<div id="panel-{{id}}" class="panel-container">
+					<div class="panel-header" data-target="#panel-{{id}}">
+						{{title}}
+					</div>
+
+					<div class="panel-body {{class}}">
+						<div class="panel-content">
+						{{output}}
+						</div> 
+						<div class="step-form-controls">
+							<button class="button btn left prev-step">Back</button>
+							<button class="button btn left next-step">Continue</button>
+						</div>
+					</div>
+				</div><!-- .panel-container -->
+			{{/steps}}
+			</div>
+		</script>
+
+		<script type="text/x-handlebars" id="step-1">
+			<p>
+				<label for="name">Your name?</label>
+				<input name="name" type="text" placeholder="name" data-condition="required" />
+			</p>
+		</script>
+
+		<script type="text/x-handlebars" id="step-2">
+			<p>Your Gender</p>
+			<p>
+				<input name="gender" type="radio" value="male" /> Male
+			</p>
+			<p>
+				<input name="gender" type="radio" value="female" /> Female
+			</p>
+			<p>
+				<input name="gender" type="radio" value="dunno" /> I dunno
+			</p>
+
+		</script>
+
+		<script type="text/x-handlebars" id="step-3">
+			<p>
+				<label for="name">Favorite Activity</label>
+				<select name="favActivity">
+					<option value="">--Select Actvity--</option>
+					<option value="code">Writing Code</option>
+					<option value="outdoors">The Great Outdoors</option>
+					<option value="gemMining">Gem Mining</option>
+					<option value="bitMining">Bit Mining</option>
+				</select>
+			</p>
+		</script>
+	</div>
+```
+
+And here's the sample config object used:
+
+```javascript
+
+var setup = {
+
+		stepsTemplate: '#steps-wrapper',
+
+		steps: [
+			{
+				title: 'Step One',
+				name: 'step-1',
+				template: '#step-1'
+			},
+			{
+				title: 'Step Two',
+				name: 'step-2',
+				template: '#step-2'
+			},
+			{
+				title: 'Step Three',
+				name: 'step-3',
+				template: '#step-3'
+			}
+		]
+	};
+	
+	$("#steps").steps(setup);
+
+```
 
