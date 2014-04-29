@@ -156,9 +156,6 @@
 			 */
 			broadcast: function(_event, _with){
 
-				//console.log('Broadcast: ' + _event);
-				//console.log(_with	);
-				//
 				var self = this;
 
 				if( self.setup.subscriptions ){
@@ -200,8 +197,8 @@
 			},
 	 
 			applyTreatment: function(filterRef, filterEl){
-				var self = this;
-				var treatments = self.setup.treatments[filterRef],
+				var self = this,
+						treatments = self.setup.treatments[filterRef],
 						ret;
 
 				if(treatments){
@@ -250,6 +247,9 @@
 					if(required){ 
 
 						conditions++;
+
+						// add value to fields object
+						self.fields[this.name] = this.value;
 
 						if(self.setup.treatments && setup.treatments.onValidateField){	
 							if(applyTreatment('onValidateField', this)){
@@ -407,13 +407,13 @@
 				return patt.test(str);
 			},
 
-			
+			/**
+			 * prepareSteps - 
+			 * @return {[type]} [description]
+			 */
 			prepareSteps: function(){
 				var self = this;
-				/*
-				Loop through steps in setup object 
-				add id to each and optionally populate handlebars content
-				*/
+		
 				// build the steps
 				for(var i=0, j = this.setup.steps.length; i < j; i++){
 
@@ -429,7 +429,6 @@
 					// or load from an already loaded external template file  
 					
 					if(/#/.test(self.setup.steps[i].template)){
-
 
 						self.setup.steps[i].step = $(self.setup.steps[i].template).html();
 
@@ -452,6 +451,7 @@
 			},
 
 			renderTemplate: function(){
+
 				var self = this,
 						template = '',
 						stepsTemplate = self.setup.stepsTemplate;
@@ -469,8 +469,6 @@
 
 			setupPanels: function(){
 				var self = this;
-
-				console.log(self.container);
 
 				self.container.find('.panel-body').addClass('collapse');
 
@@ -503,7 +501,7 @@
 				self.container.find(".steps-container .panel-container:first-child").removeClass('locked');
 			},
 
-			captureChangeEvents: function(){
+				captureChangeEvents: function(){
 				var self = this;
 
 				self.container.on('keyup change', 'input, select, textarea', function(e){
@@ -513,7 +511,11 @@
 					// add value to fields object
 					self.fields[this.name] = this.value;
 
-					self.broadcast('onFieldChange', { fields: self.fields });
+					var send = $.extend({
+						fields: self.fields
+					}, self.commonBroadcastResponse(panel));
+
+					self.broadcast('onFieldChange', send);
 
 					self.evaluate(panel);
 
