@@ -92,7 +92,7 @@
 			},
 
 			regiesterHelpers: function(){
-				
+				var self = this;
 				/**
 				 * Handlebars 'select' Helper
 				 * @param  {object} context	
@@ -248,9 +248,6 @@
 
 						conditions++;
 
-						// add value to fields object
-						self.fields[this.name] = this.value;
-
 						if(self.setup.treatments && setup.treatments.onValidateField){	
 							if(applyTreatment('onValidateField', this)){
 								met++;
@@ -325,9 +322,9 @@
 				panel.next().removeClass('locked');
 
 				// unlock all next panels where conditions are met
-				for(var i=0; i < setup.steps.length; i++){	
+				for(var i=0, j=self.setup.steps.length; i < j; i++){	
 					if(self.setup.steps[i].validates){
-						$("#panel-" + (this.setup.steps[i].id + 1) ).removeClass('locked');
+						$("#panel-" + (self.setup.steps[i].id + 1) ).removeClass('locked');
 					}
 				}
 			},
