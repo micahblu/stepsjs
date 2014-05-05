@@ -119,9 +119,9 @@
 					}
 
 					return new Handlebars.SafeString(ret);
+
 				});
 			},
-
 
 			/**
 			 * evaluate evaluates validation conditions on panels and locks/unlocks steps accordingly	
@@ -130,10 +130,11 @@
 			 */
 			evaluate: function(panel){
 				var self = this;
-				if(self.conditionsMet(panel)) {
 
+				if(self.conditionsMet(panel)) {
+					console.log(panel.attr('id') + ' panel passed');
 					self.unlockNextStep(panel);
-								
+
 					var send = $.extend({
 						values: self.fields
 					}, self.commonBroadcastResponse(panel));
@@ -143,6 +144,7 @@
 					return true;
 				}
 				else {
+					console.log(panel.attr('id') + ' panel failed');
 					self.lockNextStep(panel);
 					return false;
 				}
@@ -159,7 +161,8 @@
 				var self = this;
 
 				if( self.setup.subscriptions ){
-					var hooks = self.setup.subscriptions[_event]
+
+					var hooks = self.setup.subscriptions[_event];
 
 					if(hooks){
 
@@ -170,7 +173,6 @@
 							if(typeof func === 'function'){
 
 								// check to see if a jQuery panel element is passed
-
 								var response = func.apply({event: _event}, [ _with ] );
 
 								// response may be a jQuery promise if so deal with it
@@ -229,18 +231,20 @@
 
 				if(!panel){	
 					return false;
-				}
+				}	
 				var self = this;
+
 				//set our conditions and met vars
 				var conditions = 0,
 						met = 0,
 						regex = '',
 						required,
 						handler,
-						self = this;
+						self = this,
+						rgroup = [];
 
 				// check for conditions being met, if so allow continue button
-				panel.find('input, select, textarea').each(function(index){
+				panel.find('input[type="text"], input[type="checkbox"], select, textarea').each(function(index){
 
 					required = this.getAttribute('data-condition');
 
@@ -248,19 +252,25 @@
 
 						conditions++;
 
-						if(self.setup.treatments && setup.treatments.onValidateField){	
+						self.fields[this.name] = this.value;
+
+						if(self.setup.treatments && self.setup.treatments.onValidateField){	
 							if(applyTreatment('onValidateField', this)){
+								// add value to fields object
+								self.fields[this.name] = this.value;
 								met++;
 							}
 						}else{
 
-							handler = this.getAttribute('data-validator');
+							var handler = this.getAttribute('data-validator');
 
 							if(handler){
 								if(!self.setup[handler]){
 									console.log('[Stepsjs Alert]: A custom validation handler was defined for "' + this.name + '" but no handler method was declared in the configuration object');
 								}else{
 									if(self.setup[handler].apply(null, [this])){
+										// add value to fields object
+										self.fields[this.name] = this.value;
 										met++;
 									}
 								}
@@ -273,28 +283,37 @@
 								if(regex){
 									var patt = new RegExp(regex);
 									if(patt.test( $(this).val().trim() )){
+										// add value to fields object
+										self.fields[this.name] = this.value;
 										met++;
 									}
 								}
-								else if($(this).val().trim() !== ""){
+								else if($(this).val().trim() !== "" && this.type !== 'radio'){
+									// add value to fields object
+									self.fields[this.name] = this.value;
+									
 									met++;
 								}
 							}
 						}
 					}
 				});
-
-				var r = [];
+				
+				rgroup = [];
 				panel.find('input[type="radio"]').each(function(){
 
 					// Find condition to meet
-					if(this.getAttribute('data-condition') == 'required' && !r[this.name]){
-						r[this.name] = [];
+					if(this.getAttribute('data-condition') == 'required' && !rgroup[this.name]){
+						console.log(this.value + " required");
+						rgroup[this.name] = true;
 						conditions++;
 					}
+
 					// Collect met conditions
-					if(this.getAttribute('data-condition') == 'required' && r[this.name] && this.checked){
+					if(this.getAttribute('data-condition') == 'required' && rgroup[this.name] && this.checked){
+						self.fields[this.name] = this.value;	
 						met++;
+						console.log(this.value + " met");
 					}
 				});
 
@@ -498,7 +517,8 @@
 				self.container.find(".steps-container .panel-container:first-child").removeClass('locked');
 			},
 
-				captureChangeEvents: function(){
+			captureChangeEvents: function(){
+			
 				var self = this;
 
 				self.container.on('keyup change', 'input, select, textarea', function(e){
@@ -521,6 +541,7 @@
 
 			captureClickEvents: function(){
 				var self = this;
+				
 				// Event Delegation
 				self.container.on('click', function(e){
 
@@ -536,7 +557,7 @@
 						self.next(panel);
 					} else if(self.has("prev-step", e.target.className)){
 						self.prev(panel);
-					}else if(self.has("panel-heading", e.target.className) || self.has("panel-title", e.target.className)){
+					} else if(self.has("panel-heading", e.target.className) || self.has("panel-title", e.target.className)){
 
 						if(!panel.hasClass("locked")){
 
@@ -557,11 +578,8 @@
 
 			applyBehaviors: function(){
 				var self = this;
-
 				self.captureChangeEvents();
-	
 				self.captureClickEvents();
-				
 			}
 		}
 
