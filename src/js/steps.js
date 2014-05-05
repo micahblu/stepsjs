@@ -244,7 +244,7 @@
 						rgroup = [];
 
 				// check for conditions being met, if so allow continue button
-				panel.find('input[type="text"], input[type="checkbox"], select, textarea').each(function(index){
+				panel.find('input[type="text"], input[type="hidden"], input[type="checkbox"], select, textarea').each(function(index){
 
 					required = this.getAttribute('data-condition');
 
