@@ -17,10 +17,10 @@
  *
  * Filters
  *  - onValidateField
- * 
+ *
  */
 (function($){
-	
+
 	'use strict';
 
 	var stepsjs = {};
@@ -29,7 +29,7 @@
 
 		var allowed = ['goto'];
 
-		if(allowed.has(func)){
+		if(allowed.indexOf(func) !== -1){
 			stepsjs[func].apply(stepsjs, [param]);
 		}else{
 			console.log('Method not found');
@@ -41,15 +41,15 @@
 		stepsjs = {
 
 			fields: {},
-			
+
 			step: '',
 
 			template: '',
-			
+
 			out: '',
-			
+
 			parent: {},
-			
+
 			container: {},
 
 			setup: {},
@@ -78,8 +78,8 @@
 				var self = this;
 
 				// panel index will be at a panel index of minus 2
-				// this is due to the fact steps start @ 1 and panel id's start at 0 
-				// and becuase next is implemented for the behaviour so the panel before the 
+				// this is due to the fact steps start @ 1 and panel id's start at 0
+				// and becuase next is implemented for the behaviour so the panel before the
 				// requested panel needs to be passed for reference
 				var panelIndex = (parseInt(step.replace("step-", "")) - 1);
 
@@ -95,7 +95,7 @@
 				var self = this;
 				/**
 				 * Handlebars 'select' Helper
-				 * @param  {object} context	
+				 * @param  {object} context
 				 * @return {Handlebars SafeString}
 				 */
 				Handlebars.registerHelper('select', function(context){
@@ -111,7 +111,7 @@
 						for(var field in context.hash){
 							ret += ' ' + field + '=' + '"' + context.hash[field] + '"';
 						}
-						ret +='>';		
+						ret +='>';
 						for(var i=0; i < options.length; i++){
 							ret += '<option value="' + options[i].value + '" ' + (defaultSelection == options[i].value ? 'selected="selected"' : '') + '>' + options[i].label + '</options>';
 						}
@@ -124,7 +124,7 @@
 			},
 
 			/**
-			 * evaluate evaluates validation conditions on panels and locks/unlocks steps accordingly	
+			 * evaluate evaluates validation conditions on panels and locks/unlocks steps accordingly
 			 * @param  {jQuery Object} panel
 			 * @return {Boolean}
 			 */
@@ -187,7 +187,7 @@
 											var panelID = "#panel-" + panelIndex;
 
 											var html = self.setup.steps[panelIndex].template.render(data.context);
-											
+
 											$(panelID).find('.panel-content').html(html);
 										}
 									});
@@ -197,7 +197,7 @@
 					}
 				}
 			},
-	 
+
 			applyTreatment: function(filterRef, filterEl){
 				var self = this,
 						treatments = self.setup.treatments[filterRef],
@@ -206,7 +206,7 @@
 				if(treatments){
 
 					for(var i = 0, j = treatments.length; i < j; i++){
-						
+
 						var func = this.setup[treatments[i]];
 
 						if(typeof func === 'function'){
@@ -229,9 +229,9 @@
 			 */
 			conditionsMet: function(panel){
 
-				if(!panel){	
+				if(!panel){
 					return false;
-				}	
+				}
 				var self = this;
 
 				//set our conditions and met vars
@@ -248,13 +248,13 @@
 
 					required = this.getAttribute('data-condition');
 
-					if(required){ 
+					if(required){
 
 						conditions++;
 
 						self.fields[this.name] = this.value;
 
-						if(self.setup.treatments && self.setup.treatments.onValidateField){	
+						if(self.setup.treatments && self.setup.treatments.onValidateField){
 							if(applyTreatment('onValidateField', this)){
 								// add value to fields object
 								self.fields[this.name] = this.value;
@@ -291,14 +291,14 @@
 								else if($(this).val().trim() !== "" && this.type !== 'radio'){
 									// add value to fields object
 									self.fields[this.name] = this.value;
-									
+
 									met++;
 								}
 							}
 						}
 					}
 				});
-				
+
 				rgroup = [];
 				panel.find('input[type="radio"]').each(function(){
 
@@ -311,7 +311,7 @@
 
 					// Collect met conditions
 					if(this.getAttribute('data-condition') == 'required' && rgroup[this.name] && this.checked){
-						self.fields[this.name] = this.value;	
+						self.fields[this.name] = this.value;
 						met++;
 						console.log(this.value + " met");
 					}
@@ -324,7 +324,7 @@
 				}else{
 					self.setup.steps[panel.attr('id').replace(/[^0-9]+/, '')].validates = false;
 					return false;
-				}		
+				}
 			},
 
 			/**
@@ -341,7 +341,7 @@
 				panel.next().removeClass('locked');
 
 				// unlock all next panels where conditions are met
-				for(var i=0, j=self.setup.steps.length; i < j; i++){	
+				for(var i=0, j=self.setup.steps.length; i < j; i++){
 					if(self.setup.steps[i].validates){
 						$("#panel-" + (self.setup.steps[i].id + 1) ).removeClass('locked');
 					}
@@ -372,7 +372,7 @@
 							step: stepslug
 						}
 					}
-					
+
 				}else{
 					console.log('panel undefined');
 				}
@@ -391,12 +391,12 @@
 				panel.find('.panel-body').addClass('collapse');
 
 				panel.next().find('.panel-body').removeClass('collapse');
-				
+
 				self.broadcast('onAfterLoadNext', self.commonBroadcastResponse(panel));
 			},
 
 			/**
-			 * prev collapses current panel and displays previous								
+			 * prev collapses current panel and displays previous
 			 * @param  {object} panel
 			 * @return {void}
 			 */
@@ -424,34 +424,34 @@
 			},
 
 			/**
-			 * prepareSteps - 
+			 * prepareSteps -
 			 * @return {[type]} [description]
 			 */
 			prepareSteps: function(){
 				var self = this;
-		
+
 				// build the steps
 				for(var i=0, j = this.setup.steps.length; i < j; i++){
 
 					if(typeof this.setup.steps[i] !== 'object'){
 						continue;
-					} 
+					}
 
 					var stepTemplate;
 
 					self.setup.steps[i].id = i;
 
 					// Based on template syntax look for either in document handlebars template or
-					// or load from an already loaded external template file  
-					
+					// or load from an already loaded external template file
+
 					if(/#/.test(self.setup.steps[i].template)){
 
 						self.setup.steps[i].step = $(self.setup.steps[i].template).html();
 
 						stepTemplate = Handlebars.compile(self.setup.steps[i].step);
-						
+
 						self.setup.steps[i].output = new Handlebars.SafeString(stepTemplate(self.setup.steps[i].context));
-							
+
 					}else{
 
 						stepTemplate = self.setup.steps[i].template.render;
@@ -513,12 +513,12 @@
 					}
 				});
 
-				// Unlock first step 
+				// Unlock first step
 				self.container.find(".steps-container .panel-container:first-child").removeClass('locked');
 			},
 
 			captureChangeEvents: function(){
-			
+
 				var self = this;
 
 				self.container.on('keyup change', 'input, select, textarea', function(e){
@@ -541,7 +541,7 @@
 
 			captureClickEvents: function(){
 				var self = this;
-				
+
 				// Event Delegation
 				self.container.on('click', function(e){
 
@@ -562,7 +562,7 @@
 						if(!panel.hasClass("locked")){
 
 							if(panel.find(".panel-body").hasClass("collapse")){
-							
+
 								// collapse this panel
 								$('.panel-body').addClass('collapse');
 
@@ -585,8 +585,8 @@
 
 		return this.each(function(){
 				options.container = this;
-				stepsjs.init( options );			
-    }); 
+				stepsjs.init( options );
+    });
 
 	};
 }(jQuery));
