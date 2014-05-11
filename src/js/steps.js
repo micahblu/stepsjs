@@ -2,21 +2,10 @@
  * Steps js
  *
  * Build your form in steps with steps js :)
- * @author : micahblu @ micahblu.com | github.com/micahblu
+ * 
+ * @author : micahblu | micahblu.com | github.com/micahblu
  * @license http://opensource.org/licenses/MIT MIT License
- * @version 0.0.4
- *
- * Hooks
- *  - onPanelValidated
- *  - onBeforeLoadNext
- *  - onAfterLoadNext
- *  - onBeforeLoadPrev
- *  - onAfterLoadPrev
- *  - onClickEvent
- *  - onPanelExpanded
- *
- * Filters
- *  - onValidateField
+ * @version 0.0.5
  * 
  */
 (function($){
