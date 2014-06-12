@@ -3,36 +3,37 @@ module( "Basic", {
 	setup: function() {
 		var setup = {
 
-		stepsTemplate: '#steps-wrapper',
+			stepsTemplate: '#steps-wrapper',
 
-		steps: [
-			{
-				title: 'Step One',
-				name: 'step-1',
-				template: '#step-1'
-			},
-			{
-				title: 'Step Two',
-				name: 'step-2',
-				template: '#step-2'
-			},
-			{
-				title: 'Step Three',
-				name: 'step-3',
-				template: '#step-3'
-			}
-		]
-	};
+			steps: [
+				{
+					title: 'Step One',
+					name: 'step-1',
+					template: '#step-1'
+				},
+				{
+					title: 'Step Two',
+					name: 'step-2',
+					template: '#step-2'
+				},
+				{
+					title: 'Step Three',
+					name: 'step-3',
+					template: '#step-3'
+				}
+			]
+		};
 
-	$("#steps").steps(setup);
+		$("#steps").steps(setup);
 
-	// setup vars
-	this.container = $('.steps-container');
+		// setup vars
+		this.container = $('.steps-container');
 		this.nextButton = $('.next-step');
 		this.clickEvent = $.Event('click');
 	},
+	
 	teardown: function() {
-	// clean up after each test
+		// clean up after each test
 	}
 });
 
