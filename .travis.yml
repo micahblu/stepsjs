@@ -4,6 +4,7 @@ node_js:
 
 before_script:
   - npm install -g grunt
+  - npm install -g bower
   - npm install
   - cd src && bower install
   - cd ../
