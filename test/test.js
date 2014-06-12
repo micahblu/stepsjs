@@ -41,11 +41,17 @@ test("Basic", function(){
 	// Did the plugin successfully insert into the DOM ?
  	equal(this.container.length, '1', 'Steps inserted to DOM');
 
- 	this.nextButton.trigger(this.clickEvent);
-
+ 	// Ensure all but the first panel are locked
 	this.container.children('.panel').each(function(index){
 		if(index > 0 ){
 			equal($(this).hasClass('locked'), true, 'Panel Number ' + (index+1) + ' is locked');
 		}
 	});
+
+	// Does the next panel load without validating?
+	this.nextButton.trigger(this.clickEvent);
+
+	// Since no input has been added the next button should not load the next panel
+	equal(this.container.children('.panel').first().next().hasClass('locked'), true, 'Next panel successfully remained locked after clicking next')
+
 });
