@@ -100,4 +100,7 @@ module.exports = function(grunt) {
 
   // Default task(s).
   grunt.registerTask('default', ['sass', 'copy', 'uglify', 'watch']);
+
+  // Task to run tests
+  grunt.registerTask('test', 'qunit');
 };
