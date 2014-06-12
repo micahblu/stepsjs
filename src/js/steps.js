@@ -1,5 +1,4 @@
-/**
- * Steps js
+ /* Steps js
  *
  * Build your form in steps with steps js :)
  * 
@@ -49,6 +48,7 @@
 		},
 
 		goto: function(step){
+
 			var self = this;
 
 			// panel index will be at a panel index of minus 2
@@ -75,9 +75,9 @@
 			Handlebars.registerHelper('select', function(context){
 
 				var ret = '',
-						index = parseInt(context.hash.step),
-						options = self.setup.steps[index].context.options,
-						defaultSelection = self.setup.steps[index].context.defaultSelection;
+					index = parseInt(context.hash.step),
+					options = self.setup.steps[index].context.options,
+					defaultSelection = self.setup.steps[index].context.defaultSelection;
 
 				if(context.hash.step){
 					ret += '<select';
@@ -135,6 +135,8 @@
 
 			var self = this;
 
+			console.log(_event + ' with: ' +  _with);
+
 			if( self.setup.subscriptions ){
 
 				var hooks = self.setup.subscriptions[_event];
@@ -175,8 +177,8 @@
  
 		applyTreatment: function(filterRef, filterEl){
 			var self = this,
-					treatments = self.setup.treatments[filterRef],
-					ret;
+				treatments = self.setup.treatments[filterRef],
+				ret;
 
 			if(treatments){
 
@@ -211,12 +213,12 @@
 
 			//set our conditions and met vars
 			var conditions = 0,
-					met = 0,
-					regex = '',
-					required,
-					handler,
-					self = this,
-					rgroup = [];
+				met = 0,
+				regex = '',
+				required,
+				handler,
+				self = this,
+				rgroup = [];
 
 			// check for conditions being met, if so allow continue button
 			panel.find('input[type="text"], input[type="hidden"], input[type="checkbox"], select, textarea').each(function(index){
@@ -333,7 +335,6 @@
 			panel.nextAll().addClass('locked');
 		},
 
-
 		commonBroadcastResponse: function(panel){
 			var self = this;
 			if(panel){
@@ -444,8 +445,8 @@
 		renderTemplate: function(){
 
 			var self = this,
-					template = '',
-					stepsTemplate = self.setup.stepsTemplate;
+				template = '',
+				stepsTemplate = self.setup.stepsTemplate;
 
 			// Either compile in document template or assign the precomiled template to the template var
 			if(/#/.test(stepsTemplate)){
@@ -521,6 +522,8 @@
 			self.container.on('click', function(e){
 
 				var panel = $(e.target).parents(".panel-container");
+				
+				console.log('Click detected on ' + e.target);
 
 				var send = $.extend({
 					e: e
@@ -528,9 +531,9 @@
 
 				self.broadcast('onClickEvent', send);
 
-				if(self.has("next-step", e.target.className)){
+				if(self.has("next-step", e.target.className) && !e.target.disabled){
 					self.next(panel);
-				} else if(self.has("prev-step", e.target.className)){
+				} else if(self.has("prev-step", e.target.className) && !e.target.disabled){
 					self.prev(panel);
 				} else if(self.has("panel-heading", e.target.className) || self.has("panel-title", e.target.className)){
 
@@ -572,7 +575,7 @@
 	$.fn.steps = function( options ) {
 		return this.each(function(){
 			options.container = this;
-			stepsjs.init( options );			
+			stepsjs.init( options );
    	 	}); 
 	};
 }(jQuery));

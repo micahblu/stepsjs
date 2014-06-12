@@ -5,14 +5,95 @@
     <title>Steps JS</title>
     <meta name="viewport" content="initial-scale=1">
     <link rel="stylesheet" href="../build/assets/stylesheets/steps.css">
+      <link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="../node_modules/qunitjs/qunit/qunit.css">
+
 </head>
 <body>
 
 	<div id="qunit"></div>
   <div id="qunit-fixture"></div>
 
+
+  <div class="container">
+
+    <h1>Stepsjs</h1>
+    <div id="steps"></div>
+
+    <script type="text/x-handlebars" id="steps-wrapper">
+      <div class="steps-container">
+      {{#steps}}
+        <div id="panel-{{id}}" class="panel panel-primary panel-container">
+          <div class="panel-heading" data-target="#panel-{{id}}">
+            {{title}}
+          </div>
+
+          <div class="panel-body {{class}}">
+            <div class="panel-content">
+            {{output}}
+            </div> 
+            <div class="step-form-controls">
+              <button class="btn btn-default left prev-step">Back</button>
+              <button class="btn btn-default left next-step">Continue</button>
+            </div>
+          </div>
+        </div><!-- .panel-container -->
+      {{/steps}}
+      </div>
+    </script>
+
+    <script type="text/x-handlebars" id="step-1">
+      <p>
+        <label for="name">Your name?</label>
+        <input name="name" class="form-control" type="text" placeholder="name" data-condition="required" />
+      </p>
+    </script>
+
+    <script type="text/x-handlebars" id="step-2">
+      <p><label>Your Gender</label></p>
+      
+      
+      <div class="radio">
+        <label>
+        <input name="gender" type="radio" value="male" />
+        Male      
+        </label>
+      </div>
+      
+      <div class="radio">
+        <label>
+        <input name="gender" type="radio" value="female" />
+        Female    
+        </label>
+      </div>
+      
+      <div class="radio">
+        <label>
+        <input name="gender" type="radio" value="unsure" />
+        Neither    
+        </label>
+      </div>      
+
+    </script>
+
+    <script type="text/x-handlebars" id="step-3">
+      <p>
+        <label for="name">Favorite Activity</label>
+
+        <select class="form-control" name="favActivity">
+          <option value="">--Select Actvity--</option>
+          <option value="code">Writing Code</option>
+          <option value="outdoors">The Great Outdoors</option>
+          <option value="gemMining">Gem Mining</option>
+          <option value="bitMining">Bit Mining</option>
+        </select>
+      </p>
+    </script>
+  </div>
+
   <script src="../node_modules/qunitjs/qunit/qunit.js"></script>
+  <script src="../build/assets/vendor/jquery/dist/jquery.min.js"></script>
+  <script src="../build/assets/vendor/handlebars/handlebars.min.js"></script>
 	<script src="../build/assets/js/steps.min.js"></script>
 	<script src="test.js"></script>
 </body>
