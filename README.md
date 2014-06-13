@@ -1,4 +1,4 @@
-Stepsjs
+Stepsjs [![Build Status](https://travis-ci.org/micahblu/stepsjs.svg?branch=master)](https://travis-ci.org/micahblu/stepsjs)
 =======
 
 _Segment your form in valdiated sequential steps_
