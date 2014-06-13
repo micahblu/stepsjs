@@ -2,7 +2,7 @@
  
 {
     // Settings
-    "passfail"      : false,  // Stop on first error.
+    "passfail"      : true,  // Stop on first error.
     "maxerr"        : 100,    // Maximum error before stopping.
  
  
@@ -15,7 +15,7 @@
     "wsh"           : true,   // Windows Scripting Host.
  
     "jquery"        : true,
-    "ender"         : true,
+    //"ender"         : true, // Got: Bad option: 'ender'.
     "prototypejs"   : false,
     "mootools"      : false,
     "dojo"          : false,
@@ -28,7 +28,7 @@
  
  
     // Development.
-    "debug"         : false,  // Allow debugger statements e.g. browser breakpoints.
+    "debug"         : true,  // Allow debugger statements e.g. browser breakpoints.
     "devel"         : true,   // Allow developments statements e.g. `console.log();`.
  
  

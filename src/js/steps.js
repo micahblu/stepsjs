@@ -11,6 +11,8 @@
 	
 	'use strict';
 
+	var Handlebars = Handlebars || {};
+
 	var stepsjs = {
 
 		fields: {},
@@ -47,9 +49,17 @@
 
 		},
 
-		goto: function(step){
 
-			var self = this;
+
+
+		/**
+		 * goto
+		 * Will open any unlocked step
+		 * @since
+		 * @param {step} String 
+		 * @return void
+		 */
+		goto: function(step){
 
 			// panel index will be at a panel index of minus 2
 			// this is due to the fact steps start @ 1 and panel id's start at 0 
@@ -59,9 +69,13 @@
 
 			var panel = $("#panel-" + panelIndex);
 
-			$('.panel-body').addClass('collapse');
+			if(!this.panelLocked(panel)){
+				$('.panel-body').addClass('collapse');
 
-			panel.find('.panel-body').removeClass('collapse');
+				panel.find('.panel-body').removeClass('collapse');
+			}else{
+				console.log('The panel for step \'' + step + '\' is locked');
+			}
 
 		},
 
@@ -84,11 +98,13 @@
 
 					// add element attributes from context hash
 					for(var field in context.hash){
-						ret += ' ' + field + '=' + '"' + context.hash[field] + '"';
-					}
-					ret += '>';		
+            if(context.hash.hasOwnProperty(field)){
+              ret += ' ' + field + '=' + '"' + context.hash[field] + '"';
+            }
+          }
+					ret += '>';
 					for(var i=0; i < options.length; i++){
-						ret += '<option value="' + options[i].value + '" ' + (defaultSelection == options[i].value ? 'selected="selected"' : '') + '>' + options[i].label + '</options>';
+						ret += '<option value="' + options[i].value + '" ' + (defaultSelection === options[i].value ? 'selected="selected"' : '') + '>' + options[i].label + '</options>';
 					}
 					ret += '</select>';
 				}
@@ -127,19 +143,19 @@
 
 		/**
 		 * broadcast calls subscribed hook methods on specified events
-		 * @param  {String} _event
+		 * @param  {String} theEvent
 		 * @param  {Array} params
 		 * @return {void}
 		 */
-		broadcast: function(_event, _with){
+		broadcast: function(theEvent, theSubject){
 
 			var self = this;
 
-			console.log(_event + ' with: ' +  _with);
+			console.log(theEvent + ' with: ' +  theSubject);
 
 			if( self.setup.subscriptions ){
 
-				var hooks = self.setup.subscriptions[_event];
+				var hooks = self.setup.subscriptions[theEvent];
 
 				if(hooks){
 
@@ -150,9 +166,10 @@
 						if(typeof func === 'function'){
 
 							// check to see if a jQuery panel element is passed
-							var response = func.apply({event: _event}, [ _with ] );
+							func.apply({event: theEvent}, [ theSubject ] );
 
 							// response may be a jQuery promise if so deal with it
+							/** This needs to be re written
 							if(response && response.then){
 
 								response.done(function(data){
@@ -169,13 +186,14 @@
 									}
 								});
 							}
+							*/
 						}
 					}
 				}
 			}
 		},
  
-		applyTreatment: function(filterRef, filterEl){
+		applyFilter: function(filterRef, filterEl){
 			var self = this,
 				treatments = self.setup.treatments[filterRef],
 				ret;
@@ -206,33 +224,32 @@
 		 */
 		conditionsMet: function(panel){
 
-			if(!panel){	
+			if(!panel){
 				return false;
-			}	
-			var self = this;
+			}
 
 			//set our conditions and met vars
-			var conditions = 0,
+			var self =this,
+				conditions = 0,
 				met = 0,
 				regex = '',
 				required,
-				handler,
-				self = this,
+				//handler,
 				rgroup = [];
 
 			// check for conditions being met, if so allow continue button
-			panel.find('input[type="text"], input[type="hidden"], input[type="checkbox"], select, textarea').each(function(index){
+			panel.find('input[type="text"], input[type="hidden"], input[type="checkbox"], select, textarea').each(function(){
 
 				required = this.getAttribute('data-condition');
 
-				if(required){ 
+				if(required){
 
 					conditions++;
 
 					self.fields[this.name] = this.value;
 
-					if(self.setup.treatments && self.setup.treatments.onValidateField){	
-						if(applyTreatment('onValidateField', this)){
+					if(self.setup.treatments && self.setup.treatments.onValidateField){
+						if(this.applyFilter('onValidateField', this)){
 							// add value to fields object
 							self.fields[this.name] = this.value;
 							met++;
@@ -280,17 +297,15 @@
 			panel.find('input[type="radio"]').each(function(){
 
 				// Find condition to meet
-				if(this.getAttribute('data-condition') == 'required' && !rgroup[this.name]){
-					console.log(this.value + " required");
+				if(this.getAttribute('data-condition') === 'required' && !rgroup[this.name]){
 					rgroup[this.name] = true;
 					conditions++;
 				}
 
 				// Collect met conditions
-				if(this.getAttribute('data-condition') == 'required' && rgroup[this.name] && this.checked){
-					self.fields[this.name] = this.value;	
+				if(this.getAttribute('data-condition') === 'required' && rgroup[this.name] && this.checked){
+					self.fields[this.name] = this.value;
 					met++;
-					console.log(this.value + " met");
 				}
 			});
 
@@ -301,7 +316,7 @@
 			}else{
 				self.setup.steps[panel.attr('id').replace(/[^0-9]+/, '')].validates = false;
 				return false;
-			}		
+			}
 		},
 
 		/**
@@ -318,7 +333,7 @@
 			panel.next().removeClass('locked');
 
 			// unlock all next panels where conditions are met
-			for(var i=0, j=self.setup.steps.length; i < j; i++){	
+			for(var i=0, j=self.setup.steps.length; i < j; i++){
 				if(self.setup.steps[i].validates){
 					$("#panel-" + (self.setup.steps[i].id + 1) ).removeClass('locked');
 				}
@@ -346,7 +361,7 @@
 					return {
 						panel: panel,
 						step: stepslug
-					}
+					};
 				}
 				
 			}else{
@@ -411,7 +426,7 @@
 
 				if(typeof this.setup.steps[i] !== 'object'){
 					continue;
-				} 
+				}
 
 				var stepTemplate;
 
@@ -476,13 +491,13 @@
 			self.container.find(".panel-container").addClass('locked');
 
 			// before proceeding evaluate all steps as they might have been pre-populated
-			self.container.find(".steps-container .panel-container").each(function(index){
+			self.container.find(".steps-container .panel-container").each(function(){
 
 				var panel = $(this);
-				var lastValidPanel = null;
+				//var lastValidPanel = null;
 				var lastPanel = "panel-" + (self.setup.steps.length - 1);
 
-				if(self.evaluate(panel) && panel.attr('id') != lastPanel){
+				if(self.evaluate(panel) && panel.attr('id') !== lastPanel){
 					self.next(panel);
 				}else{
 					return false;
@@ -505,7 +520,8 @@
 				self.fields[this.name] = this.value;
 
 				var send = $.extend({
-					fields: self.fields
+					fields: self.fields,
+          event: e
 				}, self.commonBroadcastResponse(panel));
 
 				self.broadcast('onFieldChange', send);
@@ -559,7 +575,7 @@
 			self.captureChangeEvents();
 			self.captureClickEvents();
 		}
-	}
+	};
 
 	/**
 	 * $.steps 
@@ -568,14 +584,15 @@
 	$.steps = (function(){
 		return {
 			goto: stepsjs.goto,
-			evaluate: stepsjs.evaluate
-		}
+			evaluate: stepsjs.evaluate,
+			update: stepsjs.update
+		};
 	})();
 
 	$.fn.steps = function( options ) {
 		return this.each(function(){
 			options.container = this;
 			stepsjs.init( options );
-   	 	}); 
+		});
 	};
 }(jQuery));
