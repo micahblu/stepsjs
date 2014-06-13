@@ -54,13 +54,7 @@ module.exports = function(grunt) {
     },
 
     qunit: {
-      all: {
-        options: {
-          urls: [
-              'http://localhost:9000/test/index.html'
-          ]
-        }
-      }
+      all: ['test/index.html']
     },
 
     jshint: {
