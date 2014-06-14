@@ -55,5 +55,7 @@ test("Basic", function(){
 	// Since no input has been added the next button should not load the next panel
 	equal(this.container.children('.panel').first().next().hasClass('locked'), true, 'Next panel successfully remained locked after clicking next')
 
-	console.log($.steps.goto('3'));
+	//console.log($.steps.goto('3'));
+
+	console.log($.steps.gotoStep('3'));
 });
