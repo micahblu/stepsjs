@@ -4,13 +4,13 @@
  * 
  * @author : micahblu | micahblu.com | github.com/micahblu
  * @license http://opensource.org/licenses/MIT MIT License
- * @version 0.0.5
+ * @version 0.0.9
  * 
  */
 (function($){
 	
 	'use strict';
-
+	
 	var fields = {},
 		step = '',
 		template = '',
@@ -65,8 +65,8 @@
 		var panel = $("#panel-" + panelIndex);
 
 		console.log(this);
-		/*
-		if(!this.panelLocked(panel)){
+
+		if(!panelLocked(panel)){
 			// Collapse all other open panel bodies
 			$('.panel-body').addClass('collapse');
 
@@ -75,7 +75,7 @@
 		}else{
 			console.log('The panel for step \'' + step + '\' is locked');
 		}
-		*/
+		
 	}
 
 	function regiesterHelpers(){
@@ -167,30 +167,27 @@
 
 						// check to see if a jQuery panel element is passed
 						func.apply({event: theEvent}, [ theSubject ] );
-
-						// response may be a jQuery promise if so deal with it
-						/** This needs to be re written
-						if(response && response.then){
-
-							response.done(function(data){
-
-								if(data.request === 'update-step'){
-
-									var panelIndex = (data.step.replace("step-", ""));
-
-									var panelID = "#panel-" + panelIndex;
-
-									var html = setup.steps[panelIndex].template.render(data.context);
-									
-									$(panelID).find('.panel-content').html(html);
-								}
-							});
-						}
-						*/
 					}
 				}
 			}
 		}
+	}
+
+	/**
+	 * updateStep
+	 *
+	 * Updates the handlebars template for a given step with new context 
+	 * @param step String
+	 * @param context Object
+	 * @return void 
+	 */
+	function updateStep(step, context){
+
+		var panelIndex = (step.replace("step-", "")),
+				panelID = "#panel-" + panelIndex,
+				html = setup.steps[panelIndex].template.render(context);
+
+		$(panelID).find('.panel-content').html(html);
 	}
  
 	function applyFilter(filterRef, filterEl){
@@ -580,7 +577,8 @@
 	$.steps = (function(){
 		return {
 			gotoStep: gotoStep,
-			evaluate: evaluate
+			evaluate: evaluate,
+			updateStep: updateStep
 		};
 	})();
 
