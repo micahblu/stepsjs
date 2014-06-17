@@ -4,13 +4,13 @@
  * 
  * @author : micahblu | micahblu.com | github.com/micahblu
  * @license http://opensource.org/licenses/MIT MIT License
- * @version 0.0.9
+ * @version 0.1.0
  * 
  */
 (function($){
 	
 	'use strict';
-	
+
 	var fields = {},
 		step = '',
 		template = '',
@@ -177,9 +177,9 @@
 	 * updateStep
 	 *
 	 * Updates the handlebars template for a given step with new context 
-	 * @param step String
-	 * @param context Object
-	 * @return void 
+	 * @param {String} step
+	 * @param {Object} context
+	 * @return void
 	 */
 	function updateStep(step, context){
 
@@ -220,6 +220,8 @@
 	 */
 	function conditionsMet(panel){
 
+		console.log(panel);
+
 		if(!panel){
 			return false;
 		}
@@ -230,11 +232,10 @@
 			met = 0,
 			regex = '',
 			required,
-			//handler,
 			rgroup = [];
 
 		// check for conditions being met, if so allow continue button
-		panel.find('input[type="text"], input[type="hidden"], input[type="checkbox"], select, textarea').each(function(){
+		panel.find('input[type="text"], input[type="hidden"], input[type="checkbox"], select, textarea').not(":hidden").each(function(){
 
 			required = this.getAttribute('data-condition');
 
@@ -504,39 +505,34 @@
 	}
 
 	function captureChangeEvents(){
-	
-		container.on('keyup change', 'input, select, textarea', function(e){
 
-			var panel = $(this).parents('.panel-container');
-
+		container.on('keyup change', 'select, input, textarea', function(e){
 			// add value to fields object
 			fields[this.name] = this.value;
 
-			var send = $.extend({
-				fields: fields,
-      event: e
-			}, commonBroadcastResponse(panel));
-
-			broadcast('onFieldChange', send);
-
-			evaluate(panel);
-
+			handleChangeEvents(e);
 		});
 	}
 
-	function captureClickEvents(){
+	function handleChangeEvents(e){
 		
+		var panel = $(e.target).parents('.panel-container');
+
+		var send = $.extend({ fields: fields, event: e }, commonBroadcastResponse(panel));
+
+		broadcast('onFieldChange', send);
+
+		evaluate(panel);
+	}
+
+	function captureClickEvents(){
 		
 		// Event Delegation
 		container.on('click', function(e){
 
 			var panel = $(e.target).parents(".panel-container");
 			
-			console.log('Click detected on ' + e.target);
-
-			var send = $.extend({
-				e: e
-			}, commonBroadcastResponse(panel));
+			var send = $.extend({ e: e }, commonBroadcastResponse(panel));
 
 			broadcast('onClickEvent', send);
 
