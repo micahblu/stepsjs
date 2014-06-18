@@ -64,8 +64,6 @@
 
 		var panel = $("#panel-" + panelIndex);
 
-		console.log(this);
-
 		if(!panelLocked(panel)){
 			// Collapse all other open panel bodies
 			$('.panel-body').addClass('collapse');
@@ -87,32 +85,54 @@
 		 */
 
 		if(Handlebars){
+
 			Handlebars.registerHelper('select', function(context){
 
-				var ret = '',
-					index = parseInt(context.hash.step),
-					options = setup.steps[index].context.options,
-					defaultSelection = setup.steps[index].context.defaultSelection;
+				// Obtain the model
+				if(context.hash.data && context.hash.data.match(/\./)){
+							
+					var props = context.hash.data.split("."),
+							model = window;
 
-				if(context.hash.step){
-					ret += '<select';
+					for(var i=0, l=props.length; i < l; i++){
+						if(model.hasOwnProperty(props[i])){
+							model = model[props[i]];
+						}else{
+							console.log(model + ' does not have: ' + props[i]);
+							break;
+						}
+					};
+				}else if(context.hash.data){
+					model = window[context.hash.data];
+				}else{
+					console.log('Error: Select helper needs a data context to be passed as a paramter');
+					return;
+				}
+			
+				// Build the component
+				var ret = '<select',
+						label = context.hash.dataLabelField,
+						value = context.hash.dataValueField,
+						defaultSelection = context.hash.defaultSelection;
 
-					// add element attributes from context hash
-					for(var field in context.hash){
-			            if(context.hash.hasOwnProperty(field)){
-			              ret += ' ' + field + '=' + '"' + context.hash[field] + '"';
-			            }
-			          }
-					ret += '>';
-					for(var i=0; i < options.length; i++){
-						ret += '<option value="' + options[i].value + '" ' + (defaultSelection === options[i].value ? 'selected="selected"' : '') + '>' + options[i].label + '</options>';
-					}
-				
-						ret += '</select>';
+				// add element attributes from context hash
+				for(var field in context.hash){
+          if(context.hash.hasOwnProperty(field) && field !== 'data'){
+            ret += ' ' + field + '=' + '"' + context.hash[field] + '"';
+          }
+        }
+				ret += '>';
+
+				if(context.hash.placeholder){
+					ret += '<option value="">' + context.hash.placeholder + '</option>';
+				}
+				for(var i=0; i < model.length; i++){
+					ret += '<option value="' + model[i][value] + '" ' + (defaultSelection === model[i][value] ? 'selected="selected"' : '') + '>' + model[i][label] + '</option>';
 				}
 
-				return new Handlebars.SafeString(ret);
+				ret += '</select>';
 
+				return new Handlebars.SafeString(ret);
 			});
 		}
 	}
@@ -125,7 +145,6 @@
 	function evaluate(panel){
 		
 		if(conditionsMet(panel)) {
-			console.log(panel.attr('id') + ' panel passed');
 			unlockNextStep(panel);
 
 			var send = $.extend({
@@ -137,7 +156,6 @@
 			return true;
 		}
 		else {
-			console.log(panel.attr('id') + ' panel failed');
 			lockNextStep(panel);
 			return false;
 		}
@@ -150,8 +168,6 @@
 	 * @return {void}
 	 */
 	function broadcast(theEvent, theSubject){
-
-		console.log(theEvent + ' with: ' +  theSubject);
 
 		if( setup.subscriptions ){
 
@@ -220,8 +236,6 @@
 	 */
 	function conditionsMet(panel){
 
-		console.log(panel);
-
 		if(!panel){
 			return false;
 		}
@@ -235,7 +249,7 @@
 			rgroup = [];
 
 		// check for conditions being met, if so allow continue button
-		panel.find('input[type="text"], input[type="hidden"], input[type="checkbox"], select, textarea').not(":hidden").each(function(){
+		panel.find('input[type="text"], input[type="hidden"], input[type="checkbox"], select, textarea').not(":hidden").each(function(e){
 
 			required = this.getAttribute('data-condition');
 
@@ -245,48 +259,42 @@
 
 				fields[this.name] = this.value;
 
-				if(setup.treatments && setup.treatments.onValidateField){
-					if(this.applyFilter('onValidateField', this)){
-						// add value to fields object
-						fields[this.name] = this.value;
-						met++;
-					}
-				}else{
 
-					var handler = this.getAttribute('data-validator');
+				var handler = this.getAttribute('data-validator');
 
-					if(handler){
-						if(!setup[handler]){
-							console.log('[Stepsjs Alert]: A custom validation handler was defined for "' + this.name + '" but no handler method was declared in the configuration object');
-						}else{
-							if(setup[handler].apply(null, [this])){
-								// add value to fields object
-								fields[this.name] = this.value;
-								met++;
-							}
-						}
-					}
-					// No custom handler defined, rely on data-expected attribute for validation
-					else{
-
-						regex = this.getAttribute('data-expected');
-
-						if(regex){
-							var patt = new RegExp(regex);
-							if(patt.test( $(this).val().trim() )){
-								// add value to fields object
-								fields[this.name] = this.value;
-								met++;
-							}
-						}
-						else if($(this).val().trim() !== "" && this.type !== 'radio'){
+				if(handler){
+					if(!setup[handler]){
+						console.log('[Stepsjs Alert]: A custom validation handler was defined for "' + this.name + '" but no handler method was declared in the configuration object');
+					}else{
+						if(setup[handler].apply(null, [this])){
 							// add value to fields object
 							fields[this.name] = this.value;
-							
 							met++;
 						}
 					}
 				}
+				// No custom handler defined, rely on data-expected attribute for validation
+				else{
+					console.log('HERE NOW');
+					regex = this.getAttribute('data-expected');
+
+					if(regex){
+						var patt = new RegExp(regex);
+						if(patt.test( $(this).val().trim() )){
+
+							// add value to fields object
+							fields[this.name] = this.value;
+							met++;
+						}
+					}
+					else if($(this).val().trim() !== "" && this.type !== 'radio'){
+						// add value to fields object
+						fields[this.name] = this.value;
+						
+						met++;
+					}
+				}
+			
 			}
 		});
 		
