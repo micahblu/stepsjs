@@ -46,6 +46,10 @@
 		}
 	}
 
+	function getStoredValues(){
+		return fields;
+	}
+
 	/**
 	 * gotoStep
 	 * Will open any unlocked step
@@ -259,7 +263,6 @@
 
 				fields[this.name] = this.value;
 
-
 				var handler = this.getAttribute('data-validator');
 
 				if(handler){
@@ -275,7 +278,7 @@
 				}
 				// No custom handler defined, rely on data-expected attribute for validation
 				else{
-					console.log('HERE NOW');
+
 					regex = this.getAttribute('data-expected');
 
 					if(regex){
@@ -582,7 +585,8 @@
 		return {
 			gotoStep: gotoStep,
 			evaluate: evaluate,
-			updateStep: updateStep
+			updateStep: updateStep,
+			getStoredValues: getStoredValues
 		};
 	})();
 
