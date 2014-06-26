@@ -37,6 +37,12 @@
 
 	}
 
+	/**
+	 * panelLocked
+	 *
+	 * @param {panel} jQuery Object
+	 * @return Boolean
+	 */
 	function panelLocked(panel){
 
 		if(panel.hasClass('locked')){
@@ -46,12 +52,20 @@
 		}
 	}
 
+	/**
+	 * getStoredValues
+	 *
+	 * Returns stored field value pairs
+	 * 
+	 * @return Object
+	 */
 	function getStoredValues(){
 		return fields;
 	}
 
 	/**
 	 * gotoStep
+	 *
 	 * Will open any unlocked step
 	 * @since
 	 * @param {step} String 
@@ -80,6 +94,13 @@
 		
 	}
 
+	/**
+	 * resgisterHelpers
+	 *
+	 * Registers handlebars helpers
+	 *
+	 * @return void
+	 */
 	function regiesterHelpers(){
 		
 		/**
@@ -143,6 +164,7 @@
 
 	/**
 	 * evaluate evaluates validation conditions on panels and locks/unlocks steps accordingly	
+	 *
 	 * @param  {jQuery Object} panel
 	 * @return {Boolean}
 	 */
@@ -167,6 +189,7 @@
 
 	/**
 	 * broadcast calls subscribed hook methods on specified events
+	 *
 	 * @param  {String} theEvent
 	 * @param  {Array} params
 	 * @return {void}
