@@ -21,7 +21,7 @@
 
 	function init( options ){
 
-		regiesterHelpers();
+		registerHelpers();
 
 		container = $(options.container);
 
