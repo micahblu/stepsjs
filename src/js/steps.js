@@ -4,7 +4,7 @@
  * 
  * @author : micahblu | micahblu.com | github.com/micahblu
  * @license http://opensource.org/licenses/MIT MIT License
- * @version 0.1.0
+ * @version 0.1.1
  * 
  */
 (function($){
@@ -101,7 +101,7 @@
 	 *
 	 * @return void
 	 */
-	function regiesterHelpers(){
+	function registerHelpers(){
 		
 		/**
 		 * Handlebars 'select' Helper
