@@ -518,8 +518,7 @@
 			output += _preCompileTemplate(layout, context);
 		}
 
-		//_container.html(output.replace('undefined', ''));
-		return output;
+		return output.replace('undefined', ''); // TEMP HACK!!! Fix this
 	}
 
 	function _setPanelDefaults(){
