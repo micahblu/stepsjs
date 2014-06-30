@@ -30,14 +30,30 @@
 		_topics = {};
 
 	
-
+	/**
+	 * bind a subscriber to a topic
+	 * must be chained with following `to` method
+	 * @access public
+	 * @param Function 
+	 * @return Object this
+	 */
 	function bind(func){
 		this.func = func;
 		return this;
 	}
 
+	/**
+	 * Attaches topics to bound function set 
+	 * with preceding chained bind method
+	 * @access public
+	 * @param topics Array
+	 * @return Boolean
+	 */
 	function to(topics){
 
+		if(!topics){
+			return false;
+		}
 		for(var i=0, j=topics.length; i<j; i++){
 			if(_topics[topics[i]] === undefined){
 				_topics[topics[i]] = [this.func];
@@ -45,8 +61,17 @@
 				_topics[topics[i]].push(this.func);
 			}
 		}
+
+		return true;
 	}
 
+	/**
+	 * publish topic events to subscribed observers
+	 * @param topic String
+	 * @data Object
+	 * @access private
+	 * @return Boolean
+	 */
 	function publish(topic, data){
 		if(!_topics.hasOwnProperty(topic)){ 
 			return false;
@@ -55,8 +80,8 @@
 		for(var i=0, j=_topics[topic].length; i<j; i++){
 			_topics[topic][i](data);
 		}
+		return true;f
 	}
-
 
 	function init( options ){
 
@@ -64,11 +89,9 @@
 
 		_container = $(options.container);
 
-		_steps = setup.steps;
+		_steps = _generateIds(options.steps);
 
-		_steps = _generateIds(_steps);
-
-		_steps = _preRenderSteps(_steps);		
+		_steps = _preRenderSteps(_steps);
 
 		// Inject with steps template
 		_layout = _injectTemplates(options.layoutTemplate, _steps, 'step');
@@ -151,7 +174,7 @@
 		}else{
 			console.log('The panel for step \'' + step + '\' is locked');
 		}
-		
+
 	}
 
 	/**
@@ -235,11 +258,6 @@
 		if(_conditionsMet(panel)) {
 			_unlockNextStep(panel);
 
-			/*
-			var send = $.extend({
-				values: _fields
-			}, commonpublishResponse(panel));
-			*/
 			publish('onPanelValidated', { values: _fields, panel: panel });
 
 			return true;
@@ -512,13 +530,16 @@
 			
 			context = $.extend(templates[i].context, {
 				id: i,
-				step: injection
+				steps: injection
 			});
 
 			output += _preCompileTemplate(layout, context);
 		}
 
-		return output.replace('undefined', ''); // TEMP HACK!!! Fix this
+		if(output !== undefined){
+			return output.replace('undefined', ''); // TEMP HACK!!! Fix this
+		}
+
 	}
 
 	function _setPanelDefaults(){
@@ -537,10 +558,10 @@
 		_container.find(".panel-container").addClass('locked');
 
 		// Unlock first step 
-		_container.find(".steps-wrapper .panel-container:first-child").removeClass('locked');
+		_container.find(".panel-container:first-child").removeClass('locked');
 	}
 
-	function preEvaluatePanels(){
+	function _preEvaluatePanels(){
 
 		// before proceeding evaluate all steps as they might have been pre-populated
 		_container.find(".steps-wrapper .panel-container").each(function(){
