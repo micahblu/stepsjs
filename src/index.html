@@ -112,14 +112,19 @@
 				}
 			},
 			{
-	
 				name: 'step-3',
 				template: '#step-3',
 				context: {
 					title: 'Step Three'
 				}
 			}
-		]
+		],
+
+		subscriptions: {
+			congratulate: $.steps.bind(function(data){
+				alert('hey shitfuck, you filled out the form');
+			}).to(['initDone', 'shartEvent'])
+		}
 	};
 	
 	$("#steps").steps(setup);

@@ -7,6 +7,8 @@
  * @version 0.1.5
  * 
  */
+
+
 (function($){
 	
 	'use strict';
@@ -22,7 +24,38 @@
 		_container = {},
 
 		// Wrapping layout template for the steps
-		_layout = {};
+		_layout = {},
+
+		// Array of topics for pub/sub pattern
+		_topics = {};
+
+	
+
+	function bind(func){
+		this.func = func;
+		return this;
+	}
+
+	function to(topics){
+
+		for(var i=0, j=topics.length; i<j; i++){
+			if(_topics[topics[i]] === undefined){
+				_topics[topics[i]] = [this.func];
+			}else{
+				_topics[topics[i]].push(this.func);
+			}
+		}
+	}
+
+	function publish(topic, data){
+		if(!_topics.hasOwnProperty(topic)){ 
+			return false;
+		}
+
+		for(var i=0, j=_topics[topic].length; i<j; i++){
+			_topics[topic][i](data);
+		}
+	}
 
 
 	function init( options ){
@@ -39,14 +72,16 @@
 
 		// Inject with steps template
 		_layout = _injectTemplates(options.layoutTemplate, _steps, 'step');
-
+		
 		// Insert to DOM
 		_container.html(_layout);
 
+		// Setup default panel view configuration
 		_setPanelDefaults();
 
-		_applyBehaviors();
-		
+		// Setup on DOM event handlers
+		_attachEventHandlers();
+
 	}
 
 	/**
@@ -203,9 +238,9 @@
 			/*
 			var send = $.extend({
 				values: _fields
-			}, commonBroadcastResponse(panel));
+			}, commonpublishResponse(panel));
 			*/
-			//broadcast('onPanelValidated', send);
+			publish('onPanelValidated', { values: _fields, panel: panel });
 
 			return true;
 		}
@@ -215,35 +250,6 @@
 		}
 	}
 
-	/**
-	 * broadcast calls subscribed hook methods on specified events
-	 *
-	 * @param  String theEvent
-	 * @param  Array params
-	 * @access private
-	 * @return void
-	 */
-	function _broadcast(theEvent, theSubject){
-
-		if( setup.subscriptions ){
-
-			var hooks = setup.subscriptions[theEvent];
-
-			if(hooks){
-
-				for(var i=0, j = hooks.length; i < j; i++){
-
-					var func = setup[hooks[i]];
-
-					if(typeof func === 'function'){
-
-						// check to see if a jQuery panel element is passed
-						func.apply({event: theEvent}, [ theSubject ] );
-					}
-				}
-			}
-		}
-	}
 
 	/**
 	 * updateStep
@@ -405,13 +411,13 @@
 	 */
 	function next(panel){
 		
-		//broadcast('onBeforeLoadNext', commonBroadcastResponse(panel));
+		publish('onBeforeLoadNext', { panel: panel });
 
 		panel.find('.panel-body').addClass('collapse');
 
 		panel.next().find('.panel-body').removeClass('collapse');
 		
-		//broadcast('onAfterLoadNext', commonBroadcastResponse(panel));
+		publish('onAfterLoadNext', { panel: panel });
 	}
 
 	/**
@@ -424,13 +430,13 @@
 	 */
 	function prev(panel){
 		
-		//broadcast('onBeforeLoadPrev', commonBroadcastResponse(panel));
+		publish('onBeforeLoadPrev', { panel: panel });
 
 		panel.find('.panel-body').addClass('collapse');
 
 		panel.prev().find('.panel-body').removeClass('collapse');
 
-		//broadcast('onAfterLoadPrev', commonBroadcastResponse(panel));
+		publish('onAfterLoadPrev', { panel: panel });
 	}
 
 	/**
@@ -553,20 +559,18 @@
 
 	}
 
-	function captureChangeEvents(){
+	function _attachChangeEvents(){
 
 		_container.on('keyup change', 'select, input, textarea', function(e){
 			
 			// add value to _fields object
 			_fields[this.name] = this.value;
 
-			//handleChangeEvents(e);
-
 			var panel = $(e.target).parents('.panel-container');
 
-			//var send = $.extend({ _fields: _fields, event: e }, commonBroadcastResponse(panel));
+			//var send = $.extend({ _fields: _fields, event: e }, commonpublishResponse(panel));
 
-			//broadcast('onFieldChange', send);
+			publish('onFieldChange', { panel: panel, event: e });
 
 			evaluate(panel);
 		});
@@ -574,16 +578,16 @@
 
 
 
-	function captureClickEvents(){
+	function _attachClickEvents(){
 		
 		// Event Delegation
 		_container.on('click', function(e){
 
 			var panel = $(e.target).parents(".panel-container");
 			
-			//var send = $.extend({ e: e }, commonBroadcastResponse(panel));
+			//var send = $.extend({ e: e }, commonpublishResponse(panel));
 
-			//broadcast('onClickEvent', send);
+			publish('onClickEvent', { panel: panel });
 
 			if(_has("next-step", e.target.className) && !e.target.disabled){
 				next(panel);
@@ -601,16 +605,16 @@
 						// expand this panel
 						panel.find(".panel-body").removeClass('collapse');
 
-						//broadcast('onPanelExpanded', commonBroadcastResponse(panel));
+						publish('onPanelExpanded', { panel: panel });
 					}
 				}
 			}
 		});
 	}
 
-	function _applyBehaviors(){
-		captureChangeEvents();
-		captureClickEvents();
+	function _attachEventHandlers(){
+		_attachChangeEvents();
+		_attachClickEvents();
 	}
 
 
@@ -623,7 +627,10 @@
 			gotoStep: gotoStep,
 			evaluate: evaluate,
 			updateStep: updateStep,
-			getStoredValues: getStoredValues
+			getStoredValues: getStoredValues,
+			bind: bind,
+			to: to
+
 		};
 	})();
 
