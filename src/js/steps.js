@@ -4,46 +4,72 @@
  * 
  * @author : micahblu | micahblu.com | github.com/micahblu
  * @license http://opensource.org/licenses/MIT MIT License
- * @version 0.1.0
+ * @version 0.1.5
  * 
  */
 (function($){
 	
 	'use strict';
 
-	var fields = {},
-		step = '',
-		template = '',
-		out = '',
-		parent = {},
-		container = {},
-		setup = {};
+	var 
+		// Stores collected form field values
+		_fields = {},
+
+		// Will hold an array of steps objects, passed via init options param
+		_steps = [], 
+		
+		// Containing div that contains the entire steps form
+		_container = {},
+
+		// Wrapping layout template for the steps
+		_layout = {};
+
 
 	function init( options ){
 
-		regiesterHelpers();
+		_registerHelpers();
 
-		container = $(options.container);
+		_container = $(options.container);
 
-		setup = options;
+		_steps = setup.steps;
 
-		prepareSteps();
+		_steps = _generateIds(_steps);
 
-		renderTemplate();
+		_steps = _preRenderSteps(_steps);		
 
-		setupPanels();
+		// Inject with steps template
+		_layout = _injectTemplates(options.layoutTemplate, _steps, 'step');
 
-		applyBehaviors();
+		// Insert to DOM
+		_container.html(_layout);
 
+		_setPanelDefaults();
+
+		_applyBehaviors();
+		
+	}
+
+	/**
+	 * generates index based ids for step objects
+	 * @param Array arr
+	 * @access private
+	 * @return Array
+	 */
+	function _generateIds(arr){
+		for(var i=0, j=arr.length; i<j; i++){
+			arr[i].id = 'steps-' + i;	
+		}
+		return arr;
 	}
 
 	/**
 	 * panelLocked
 	 *
 	 * @param {panel} jQuery Object
+	 * @access private
 	 * @return Boolean
 	 */
-	function panelLocked(panel){
+	function _panelLocked(panel){
 
 		if(panel.hasClass('locked')){
 			return true;
@@ -56,19 +82,19 @@
 	 * getStoredValues
 	 *
 	 * Returns stored field value pairs
-	 * 
+	 * @access public
 	 * @return Object
 	 */
 	function getStoredValues(){
-		return fields;
+		return _fields;
 	}
 
 	/**
 	 * gotoStep
 	 *
 	 * Will open any unlocked step
-	 * @since
 	 * @param {step} String 
+	 * @access public
 	 * @return void
 	 */
 	function gotoStep(step){
@@ -78,9 +104,8 @@
 		// and becuase next is implemented for the behaviour so the panel before the 
 		// requested panel needs to be passed for reference
 		
-		var panelIndex = (parseInt(step.replace("step-", "")) - 1);
-
-		var panel = $("#panel-" + panelIndex);
+		var panelIndex = (parseInt(step.replace("step-", "")) - 1),
+			panel = $("#panel-" + panelIndex);
 
 		if(!panelLocked(panel)){
 			// Collapse all other open panel bodies
@@ -98,10 +123,10 @@
 	 * resgisterHelpers
 	 *
 	 * Registers handlebars helpers
-	 *
+	 * @access private
 	 * @return void
 	 */
-	function regiesterHelpers(){
+	function _registerHelpers(){
 		
 		/**
 		 * Handlebars 'select' Helper
@@ -142,10 +167,11 @@
 
 				// add element attributes from context hash
 				for(var field in context.hash){
-          if(context.hash.hasOwnProperty(field) && field !== 'data'){
-            ret += ' ' + field + '=' + '"' + context.hash[field] + '"';
-          }
-        }
+		          if(context.hash.hasOwnProperty(field) && field !== 'data'){
+		            ret += ' ' + field + '=' + '"' + context.hash[field] + '"';
+		          }
+		        }
+
 				ret += '>';
 
 				if(context.hash.placeholder){
@@ -165,24 +191,26 @@
 	/**
 	 * evaluate evaluates validation conditions on panels and locks/unlocks steps accordingly	
 	 *
-	 * @param  {jQuery Object} panel
-	 * @return {Boolean}
+	 * @param  jQuery Object panel
+	 * @access public
+	 * @return Boolean
 	 */
 	function evaluate(panel){
 		
-		if(conditionsMet(panel)) {
-			unlockNextStep(panel);
+		if(_conditionsMet(panel)) {
+			_unlockNextStep(panel);
 
+			/*
 			var send = $.extend({
-				values: fields
+				values: _fields
 			}, commonBroadcastResponse(panel));
-
-			broadcast('onPanelValidated', send);
+			*/
+			//broadcast('onPanelValidated', send);
 
 			return true;
 		}
 		else {
-			lockNextStep(panel);
+			_lockNextStep(panel);
 			return false;
 		}
 	}
@@ -190,11 +218,12 @@
 	/**
 	 * broadcast calls subscribed hook methods on specified events
 	 *
-	 * @param  {String} theEvent
-	 * @param  {Array} params
-	 * @return {void}
+	 * @param  String theEvent
+	 * @param  Array params
+	 * @access private
+	 * @return void
 	 */
-	function broadcast(theEvent, theSubject){
+	function _broadcast(theEvent, theSubject){
 
 		if( setup.subscriptions ){
 
@@ -220,48 +249,27 @@
 	 * updateStep
 	 *
 	 * Updates the handlebars template for a given step with new context 
-	 * @param {String} step
-	 * @param {Object} context
+	 * @param String step
+	 * @param Object context
+	 * @access public
 	 * @return void
 	 */
 	function updateStep(step, context){
 
 		var panelIndex = (step.replace("step-", "")),
-				panelID = "#panel-" + panelIndex,
-				html = setup.steps[panelIndex].template.render(context);
+			panelID = "#panel-" + panelIndex,
+			html = _steps[panelIndex].template.render(context);
 
 		$(panelID).find('.panel-content').html(html);
-	}
- 
-	function applyFilter(filterRef, filterEl){
-		var treatments = setup.treatments[filterRef],
-			ret;
-
-		if(treatments){
-
-			for(var i = 0, j = treatments.length; i < j; i++){
-				
-				var func = setup[treatments[i]];
-
-				if(typeof func === 'function'){
-					var response = func.apply({event: filterRef}, [filterEl]);
-					if(typeof response === 'string'){
-						ret += response;
-					}else{
-						ret = response;
-					}
-				}
-			}
-		}
-		return ret;
 	}
 
 	/**
 	 * conditionsMet
-	 * @param  {jQuery object} panel
-	 * @return {Boolean}
+	 * @param  jQuery object panel
+	 * @access private
+	 * @return Boolean
 	 */
-	function conditionsMet(panel){
+	function _conditionsMet(panel){
 
 		if(!panel){
 			return false;
@@ -284,7 +292,7 @@
 
 				conditions++;
 
-				fields[this.name] = this.value;
+				_fields[this.name] = this.value;
 
 				var handler = this.getAttribute('data-validator');
 
@@ -293,8 +301,8 @@
 						console.log('[Stepsjs Alert]: A custom validation handler was defined for "' + this.name + '" but no handler method was declared in the configuration object');
 					}else{
 						if(setup[handler].apply(null, [this])){
-							// add value to fields object
-							fields[this.name] = this.value;
+							// add value to _fields object
+							_fields[this.name] = this.value;
 							met++;
 						}
 					}
@@ -308,14 +316,14 @@
 						var patt = new RegExp(regex);
 						if(patt.test( $(this).val().trim() )){
 
-							// add value to fields object
-							fields[this.name] = this.value;
+							// add value to _fields object
+							_fields[this.name] = this.value;
 							met++;
 						}
 					}
 					else if($(this).val().trim() !== "" && this.type !== 'radio'){
-						// add value to fields object
-						fields[this.name] = this.value;
+						// add value to _fields object
+						_fields[this.name] = this.value;
 						
 						met++;
 					}
@@ -324,7 +332,6 @@
 			}
 		});
 		
-		rgroup = [];
 		panel.find('input[type="radio"]').each(function(){
 
 			// Find condition to meet
@@ -335,27 +342,30 @@
 
 			// Collect met conditions
 			if(this.getAttribute('data-condition') === 'required' && rgroup[this.name] && this.checked){
-				fields[this.name] = this.value;
+				_fields[this.name] = this.value;
 				met++;
 			}
 		});
 
 		//TODO: Add hook
 		if(conditions === met){
-			setup.steps[panel.attr('id').replace(/[^0-9]+/, '')].validates = true;
+			_steps[panel.attr('id').replace(/[^0-9]+/, '')].validates = true;
 			return true;
 		}else{
-			setup.steps[panel.attr('id').replace(/[^0-9]+/, '')].validates = false;
+			_steps[panel.attr('id').replace(/[^0-9]+/, '')].validates = false;
 			return false;
 		}
 	}
 
 	/**
-	 * unlockNextStep unlocks all validated subsequent steps
-	 * @param  {jQuery object} panel
-	 * @return {void}
+	 * unlockNextStep 
+	 *
+	 * unlocks all validated subsequent steps
+	 * @param  jQuery object panel
+	 * @access private
+	 * @return void
 	 */
-	function unlockNextStep(panel){
+	function _unlockNextStep(panel){
 		
 		// Enable next button
 		panel.find(".next-step").removeAttr("disabled");
@@ -364,168 +374,175 @@
 		panel.next().removeClass('locked');
 
 		// unlock all next panels where conditions are met
-		for(var i=0, j=setup.steps.length; i < j; i++){
-			if(setup.steps[i].validates){
-				$("#panel-" + (setup.steps[i].id + 1) ).removeClass('locked');
+		for(var i=0, j=_steps.length; i < j; i++){
+			if(_steps[i].validates){
+				$("#panel-" + (_steps[i].id + 1) ).removeClass('locked');
 			}
 		}
 	}
 
 	/**
-	 * lockNextStep locks all subsequent panels
-	 * @param  {jQuery object} panel
-	 * @return {void}
+	 * lockNextStep 
+	 * 
+	 * locks all subsequent panels
+	 * @param  jQuery object panel
+	 * @access private
+	 * @return void
 	 */
-	function lockNextStep(panel){
+	function _lockNextStep(panel){
 		panel.find(".next-step").attr("disabled", "disabled");
 		panel.nextAll().addClass('locked');
 	}
 
-	function commonBroadcastResponse(panel){
-		
-		if(panel){
-			if(panel.attr('id')){
-
-				var index = panel.attr('id').replace(/[^0-9]+/, '');
-				var stepslug = setup.steps[index].name;
-
-				return {
-					panel: panel,
-					step: stepslug
-				};
-			}
-			
-		}else{
-			console.log('panel undefined');
-		}
-	}
-
 	/**
-	 * next collapses current panel and displays next
-	 * @param  {object} panel
-	 * @return {void}
+	 * next 
+	 * 
+	 * collapses current panel and displays next
+	 * @param  Object panel
+	 * @access public
+	 * @return void
+	 * TODO! Needs to check to see if the next panel is locked
 	 */
 	function next(panel){
 		
-		broadcast('onBeforeLoadNext', commonBroadcastResponse(panel));
+		//broadcast('onBeforeLoadNext', commonBroadcastResponse(panel));
 
 		panel.find('.panel-body').addClass('collapse');
 
 		panel.next().find('.panel-body').removeClass('collapse');
 		
-		broadcast('onAfterLoadNext', commonBroadcastResponse(panel));
+		//broadcast('onAfterLoadNext', commonBroadcastResponse(panel));
 	}
 
 	/**
-	 * prev collapses current panel and displays previous								
-	 * @param  {object} panel
-	 * @return {void}
+	 * prev 
+	 * 
+	 * collapses current panel and displays previous								
+	 * @param  Object panel
+	 * @access public
+	 * @return void
 	 */
 	function prev(panel){
 		
-
-		broadcast('onBeforeLoadPrev', commonBroadcastResponse(panel));
+		//broadcast('onBeforeLoadPrev', commonBroadcastResponse(panel));
 
 		panel.find('.panel-body').addClass('collapse');
 
 		panel.prev().find('.panel-body').removeClass('collapse');
 
-		broadcast('onAfterLoadPrev', commonBroadcastResponse(panel));
+		//broadcast('onAfterLoadPrev', commonBroadcastResponse(panel));
 	}
 
 	/**
-	 * has matches a pattern in a string
-	 * @param  {string}  term
-	 * @param  {string}  str
-	 * @return {Boolean}
+	 * matches a pattern in a string
+	 *
+	 * @param  String  term
+	 * @param  String  str
+	 * @access private
+	 * @return Boolean
 	 */
-	function has(term, str){
+	function _has(term, str){
 		var patt = new RegExp(term);
 		return patt.test(str);
 	}
 
 	/**
-	 * prepareSteps - 
-	 * @return {[type]} [description]
+	 * resolveHbTemplateType
+	 * 
+	 * @parm steps Array
+	 * @return String enum 'pre_compiled' | 'in_document'
 	 */
-	function prepareSteps(){
+	function _preCompileTemplate(template_src, context){
 		
+		// Based on template syntax look for either in document handlebars template or
+		// or load from an already loaded external template file  
+		var source,
+			template,
+			output;
 
-		// build the steps
-		for(var i=0, j = setup.steps.length; i < j; i++){
+		// Handlebars In Dom
+		if(/#/.test(template_src)){
 
-			if(typeof setup.steps[i] !== 'object'){
-				continue;
-			}
+			source = $(template_src).html();
 
-			var stepTemplate;
-
-			setup.steps[i].id = i;
-
-			// Based on template syntax look for either in document handlebars template or
-			// or load from an already loaded external template file  
+			template = Handlebars.compile(source);
 			
-			if(/#/.test(setup.steps[i].template)){
+			output = new Handlebars.SafeString(template(context));
 
-				setup.steps[i].step = $(setup.steps[i].template).html();
-
-				stepTemplate = Handlebars.compile(setup.steps[i].step);
-				
-				setup.steps[i].output = new Handlebars.SafeString(stepTemplate(setup.steps[i].context));
-					
-			}else{
-
-				stepTemplate = setup.steps[i].template.render;
-
-				setup.steps[i].output = new Handlebars.SafeString(stepTemplate(setup.steps[i].context));
-
-			}
-
-			if(i > 0) {
-				setup.steps[i].validates = false;
-			}
 		}
-	}
+		// Handlebars Pre Compiled 
+		else{
 
-	function renderTemplate(){
+			template = template_src.render;
 
-		var self = this,
-			template = '',
-			stepsTemplate = setup.stepsTemplate;
-
-		// Either compile in document template or assign the precomiled template to the template var
-		if(/#/.test(stepsTemplate)){
-			template = Handlebars.compile($(stepsTemplate).html());
-		}else{
-			template = stepsTemplate.render;
+			output = new Handlebars.SafeString(template(context));
 		}
-		// append templated output to our wrapper div
-		$(container).html(template(setup));
-	}
 
-
-	function setupPanels(){
+		return output;
 		
+	}
 
-		container.find('.panel-body').addClass('collapse');
+	function _preRenderSteps(steps){
 
-		container.find('.panel-container:first').find('.panel-body').removeClass('collapse');
+		var containerSrc = steps.container,
+			containerContext = {};
+
+		// Pre Render the steps templates
+		for(var i=0, j=steps.length; i<j; i++){
+			steps[i].template = _preCompileTemplate(steps[i].template, steps[i].context);
+		}
+
+		return steps;
+	}
+
+	function _injectTemplates(layout, templates, outlet){
+
+		var injection,
+			output,
+			context;
+
+		for(var i=0, j=templates.length; i<j; i++){
+			injection = templates[i].template;
+			
+			context = $.extend(templates[i].context, {
+				id: i,
+				step: injection
+			});
+
+			output += _preCompileTemplate(layout, context);
+		}
+
+		//_container.html(output.replace('undefined', ''));
+		return output;
+	}
+
+	function _setPanelDefaults(){
+		
+		_container.find('.panel-body').addClass('collapse');
+
+		_container.find('.panel-container:first').find('.panel-body').removeClass('collapse');
 
 		// by default make all next button's disabled
-		container.find(".next-step").attr("disabled", "disabled");
+		_container.find(".next-step").attr("disabled", "disabled");
 
 		// remove the prev button from first step panel
-		container.find("#panel-0 .prev-step").hide();
+		_container.find("#panel-0 .prev-step").hide();
 
 		// by default lock panels
-		container.find(".panel-container").addClass('locked');
+		_container.find(".panel-container").addClass('locked');
+
+		// Unlock first step 
+		_container.find(".steps-wrapper .panel-container:first-child").removeClass('locked');
+	}
+
+	function preEvaluatePanels(){
 
 		// before proceeding evaluate all steps as they might have been pre-populated
-		container.find(".steps-container .panel-container").each(function(){
+		_container.find(".steps-wrapper .panel-container").each(function(){
 
 			var panel = $(this);
 			//var lastValidPanel = null;
-			var lastPanel = "panel-" + (setup.steps.length - 1);
+			var lastPanel = "panel-" + (_steps.length - 1);
 
 			if(evaluate(panel) && panel.attr('id') !== lastPanel){
 				next(panel);
@@ -534,47 +551,45 @@
 			}
 		});
 
-		// Unlock first step 
-		container.find(".steps-container .panel-container:first-child").removeClass('locked');
 	}
 
 	function captureChangeEvents(){
 
-		container.on('keyup change', 'select, input, textarea', function(e){
-			// add value to fields object
-			fields[this.name] = this.value;
+		_container.on('keyup change', 'select, input, textarea', function(e){
+			
+			// add value to _fields object
+			_fields[this.name] = this.value;
 
-			handleChangeEvents(e);
+			//handleChangeEvents(e);
+
+			var panel = $(e.target).parents('.panel-container');
+
+			//var send = $.extend({ _fields: _fields, event: e }, commonBroadcastResponse(panel));
+
+			//broadcast('onFieldChange', send);
+
+			evaluate(panel);
 		});
 	}
 
-	function handleChangeEvents(e){
-		
-		var panel = $(e.target).parents('.panel-container');
 
-		var send = $.extend({ fields: fields, event: e }, commonBroadcastResponse(panel));
-
-		broadcast('onFieldChange', send);
-
-		evaluate(panel);
-	}
 
 	function captureClickEvents(){
 		
 		// Event Delegation
-		container.on('click', function(e){
+		_container.on('click', function(e){
 
 			var panel = $(e.target).parents(".panel-container");
 			
-			var send = $.extend({ e: e }, commonBroadcastResponse(panel));
+			//var send = $.extend({ e: e }, commonBroadcastResponse(panel));
 
-			broadcast('onClickEvent', send);
+			//broadcast('onClickEvent', send);
 
-			if(has("next-step", e.target.className) && !e.target.disabled){
+			if(_has("next-step", e.target.className) && !e.target.disabled){
 				next(panel);
-			} else if(has("prev-step", e.target.className) && !e.target.disabled){
+			} else if(_has("prev-step", e.target.className) && !e.target.disabled){
 				prev(panel);
-			} else if(has("panel-heading", e.target.className) || has("panel-title", e.target.className)){
+			} else if(_has("panel-heading", e.target.className) || _has("panel-title", e.target.className)){
 
 				if(!panel.hasClass("locked")){
 
@@ -586,15 +601,14 @@
 						// expand this panel
 						panel.find(".panel-body").removeClass('collapse');
 
-						broadcast('onPanelExpanded', commonBroadcastResponse(panel));
+						//broadcast('onPanelExpanded', commonBroadcastResponse(panel));
 					}
 				}
 			}
 		});
 	}
 
-	function applyBehaviors(){
-		
+	function _applyBehaviors(){
 		captureChangeEvents();
 		captureClickEvents();
 	}
