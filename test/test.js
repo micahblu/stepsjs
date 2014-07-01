@@ -1,33 +1,47 @@
 
 module( "Basic", {
 	setup: function() {
-		var setup = {
 
-			stepsTemplate: '#steps-wrapper',
+		var config = {
+
+			layoutTemplate: '#steps-wrapper',
 
 			steps: [
 				{
-					title: 'Step One',
 					name: 'step-1',
-					template: '#step-1'
+					template: '#step-1',
+					context: {
+						title: 'Step One',
+						name: 'Micah'
+					}
 				},
 				{
-					title: 'Step Two',
 					name: 'step-2',
-					template: '#step-2'
+					template: '#step-2',
+					context: {
+						title: 'Step Two'
+					}
 				},
 				{
-					title: 'Step Three',
 					name: 'step-3',
-					template: '#step-3'
+					template: '#step-3',
+					context: {
+						title: 'Step Three'
+					}
 				}
-			]
+			],
+
+			subscriptions: {
+				congratulate: $.steps.bind(function(data){
+					alert('Great job, keep up the pace');
+				}).to(['onBeforeLoadNext'])
+			}
 		};
+		
+		$("#steps").steps(config);
 
-		$("#steps").steps(setup);
-
-		// setup vars
-		this.container = $('.steps-container');
+		// config vars
+		this.container = $('#steps');
 		this.nextButton = $('.next-step');
 		this.clickEvent = $.Event('click');
 	},
@@ -53,9 +67,6 @@ test("Basic", function(){
 	this.nextButton.trigger(this.clickEvent);
 
 	// Since no input has been added the next button should not load the next panel
-	equal(this.container.children('.panel').first().next().hasClass('locked'), true, 'Next panel successfully remained locked after clicking next')
+	equal(this.container.children('.panel').first().next().hasClass('locked'), true, 'Next panel successfully remained locked after clicking next');
 
-	//console.log($.steps.goto('3'));
-
-	console.log($.steps.gotoStep('3'));
 });

@@ -5,7 +5,7 @@
   <title>Steps JS</title>
   <meta name="viewport" content="initial-scale=1">
   <link href="assets/stylesheets/steps.css" rel="stylesheet" type="text/css" />
-  <link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+  <link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
 </head>
 
 <body>
@@ -15,30 +15,30 @@
 		<div id="steps"></div>
 
 		<script type="text/x-handlebars" id="steps-wrapper">
-			<div class="steps-container">
-			{{#steps}}
-				<div id="panel-{{id}}" class="panel panel-primary panel-container">
-					<div class="panel-heading" data-target="#panel-{{id}}">
-						{{title}}
-					</div>
+	
+			<div id="panel-{{id}}" class="panel panel-primary panel-container">
+				<div class="panel-heading" data-target="#panel-{{id}}">
+					{{title}}
+				</div>
 
-					<div class="panel-body {{class}}">
-						<div class="panel-content">
-						{{output}}
-						</div> 
-						<div class="step-form-controls">
-							<button class="btn btn-default left prev-step">Back</button>
-							<button class="btn btn-default left next-step">Continue</button>
-						</div>
+				<div class="panel-body {{class}}">
+					<div class="panel-content">
+					{{steps}}
+					</div> 
+					<div class="step-form-controls">
+						<button class="btn btn-default left prev-step">Back</button>
+						<button class="btn btn-default left next-step">Continue</button>
 					</div>
-				</div><!-- .panel-container -->
-			{{/steps}}
-			</div>
+				</div>
+			</div><!-- .panel-container -->
+
+
 		</script>
 
 		<script type="text/x-handlebars" id="step-1">
 			<p>
-				<label for="name">Your name?</label>
+				Hi, my name is {{name}}<br />				
+				<label for="name">What is your name?</label>
 				<input name="name" class="form-control" type="text" placeholder="name" data-condition="required" />
 			</p>
 		</script>
@@ -93,25 +93,38 @@
 
 	var setup = {
 
-		stepsTemplate: '#steps-wrapper',
+		layoutTemplate: '#steps-wrapper',
 
 		steps: [
 			{
-				title: 'Step One',
 				name: 'step-1',
-				template: '#step-1'
+				template: '#step-1',
+				context: {
+					title: 'Step One',
+					name: 'Micah'
+				}
 			},
 			{
-				title: 'Step Two',
 				name: 'step-2',
-				template: '#step-2'
+				template: '#step-2',
+				context: {
+					title: 'Step Two'
+				}
 			},
 			{
-				title: 'Step Three',
 				name: 'step-3',
-				template: '#step-3'
+				template: '#step-3',
+				context: {
+					title: 'Step Three'
+				}
 			}
-		]
+		],
+
+		subscriptions: {
+			congratulate: $.steps.bind(function(data){
+				alert('Great job, keep up the pace');
+			}).to(['initDone', 'shartEvent'])
+		}
 	};
 	
 	$("#steps").steps(setup);

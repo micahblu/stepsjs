@@ -15,36 +15,36 @@
   <div id="qunit-fixture"></div>
 
 
-  <div class="container">
+ <div class="container">
 
     <h1>Stepsjs</h1>
     <div id="steps"></div>
 
     <script type="text/x-handlebars" id="steps-wrapper">
-      <div class="steps-container">
-      {{#steps}}
-        <div id="panel-{{id}}" class="panel panel-primary panel-container">
-          <div class="panel-heading" data-target="#panel-{{id}}">
-            {{title}}
-          </div>
+  
+      <div id="panel-{{id}}" class="panel panel-primary panel-container">
+        <div class="panel-heading" data-target="#panel-{{id}}">
+          {{title}}
+        </div>
 
-          <div class="panel-body {{class}}">
-            <div class="panel-content">
-            {{output}}
-            </div> 
-            <div class="step-form-controls">
-              <button class="btn btn-default left prev-step">Back</button>
-              <button class="btn btn-default left next-step">Continue</button>
-            </div>
+        <div class="panel-body {{class}}">
+          <div class="panel-content">
+          {{steps}}
+          </div> 
+          <div class="step-form-controls">
+            <button class="btn btn-default left prev-step">Back</button>
+            <button class="btn btn-default left next-step">Continue</button>
           </div>
-        </div><!-- .panel-container -->
-      {{/steps}}
-      </div>
+        </div>
+      </div><!-- .panel-container -->
+
+
     </script>
 
     <script type="text/x-handlebars" id="step-1">
       <p>
-        <label for="name">Your name?</label>
+        Hi, my name is {{name}}<br />       
+        <label for="name">What is your name?</label>
         <input name="name" class="form-control" type="text" placeholder="name" data-condition="required" />
       </p>
     </script>
