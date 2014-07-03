@@ -42,7 +42,7 @@ Below is a working example (found in src/index.html) of a very simple setup of t
 
 		<script type="text/x-handlebars" id="steps-wrapper">
 			<div class="steps-container">
-			{{#steps}}
+		
 				<div id="panel-{{id}}" class="panel-container">
 					<div class="panel-header" data-target="#panel-{{id}}">
 						{{title}}
@@ -50,7 +50,7 @@ Below is a working example (found in src/index.html) of a very simple setup of t
 
 					<div class="panel-body {{class}}">
 						<div class="panel-content">
-						{{output}}
+						{{steps}}
 						</div> 
 						<div class="step-form-controls">
 							<button class="button btn left prev-step">Back</button>
@@ -58,7 +58,7 @@ Below is a working example (found in src/index.html) of a very simple setup of t
 						</div>
 					</div>
 				</div><!-- .panel-container -->
-			{{/steps}}
+			
 			</div>
 		</script>
 
