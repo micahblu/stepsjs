@@ -28,6 +28,13 @@ module.exports = function(grunt) {
           src: "src/index.html",
           dest: "build/index.html"
         }]
+      },
+
+      dist: {
+        files: [{
+          src: "build/assets/js/steps.min.js",
+          dest: "dest/steps.min.js"
+        }]
       }
     },
 
@@ -44,7 +51,7 @@ module.exports = function(grunt) {
       options: {
         sourceMap: true,
         preserveComments: false,
-        mangle: false,
+        mangle: true,
         report: "min"
       },
       build: {
@@ -94,7 +101,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-copy');
 
   // Default task(s).
-  grunt.registerTask('default', ['sass', 'copy', 'uglify', 'watch']);
+  grunt.registerTask('default', ['sass', 'uglify', 'copy', 'watch']);
 
   // Task to run tests
   grunt.registerTask('test', 'qunit');
