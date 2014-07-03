@@ -1,4 +1,4 @@
-/* Steps js
+ /* Steps js
  *
  * Build your form in steps with steps js :)
  * 
@@ -29,8 +29,8 @@
 		// Array of topics for pub/sub pattern
 		_topics = {},
 
+		// config
 		_config = {};
-
 	
 	/**
 	 * bind a subscriber to a topic
@@ -78,7 +78,6 @@
 		if(!_topics.hasOwnProperty(topic)){ 
 			return false;
 		}
-
 		for(var i=0, j=_topics[topic].length; i<j; i++){
 			_topics[topic][i].call({topic: topic}, data);
 		}
@@ -108,6 +107,9 @@
 
 		// Setup on DOM event handlers
 		_attachEventHandlers();
+
+		// Evaluate panels on load?
+		_preEvaluatePanels();
 
 	}
 
@@ -159,11 +161,31 @@
 	 * @access public
 	 * @return Object
 	 */
-	function getStoredValue(key){
-		if(!key in _fields){
+	function getStoredValue(key, parse){
+		if(!_fields.hasOwnProperty(key)){
 			return false;
 		}
+		if(parse && _isJson(_fields[key])){
+			return JSON.parse(_fields[key]);
+		}	
 		return _fields[key];
+	}
+
+	/**
+	 * Checks if string is valid json
+	 *
+	 * Returns stored field value pair
+	 * @param String str
+	 * @access private
+	 * @return Boolean
+	 */
+	function _isJson(str) {
+	    try {
+	        JSON.parse(str);
+	    } catch (e) {
+	        return false;
+	    }
+	    return true;
 	}
 
 	/**
@@ -206,6 +228,11 @@
 			console.log('The panel for step \'' + step + '\' is locked');
 		}
 
+		return this;
+	}
+
+	function then(func){
+		return func.call(this);
 	}
 
 	/**
@@ -216,19 +243,16 @@
 	 * @return void
 	 */
 	function _registerHelpers(){
+		
+		/**
+		 * Handlebars 'select' Helper
+		 * @param  {object} context	
+		 * @return {Handlebars SafeString}
+		 */
 
 		if(Handlebars){
 
-			/**
-			 * Handlebars 'select' Helper
-			 * @param  {object} context	
-			 * @return {Handlebars SafeString}
-			 */
-
 			Handlebars.registerHelper('select', function(context){
-
-				console.log('Handlebars');
-
 
 				// Obtain the model
 				if(context.hash.data && context.hash.data.match(/\./)){
@@ -321,7 +345,7 @@
 	 */
 	function updateStep(step, context){
 
-		var panelIndex = (step.replace("step-", "")),
+		var panelIndex = parseInt(step.replace("step-", "") - 1),
 			panelID = "#panel-" + panelIndex,
 			html = _steps[panelIndex].template.render(context);
 
@@ -603,9 +627,9 @@
 	function _preEvaluatePanels(){
 
 		// before proceeding evaluate all steps as they might have been pre-populated
-		_container.find(".steps-wrapper .panel-container").each(function(){
+		_container.find(".panel-container").each(function(){
 
-			var panel = $(this)
+			var panel = $(this),
 				lastPanel = "panel-" + (_steps.length - 1);
 
 			if(evaluate(panel) && panel.attr('id') !== lastPanel){
@@ -628,9 +652,9 @@
 			publish('onFieldChange', { panel: panel, event: e });
 
 			evaluate(panel);
+			
 		});
 	}
-
 
 
 	function _attachClickEvents(){
@@ -638,9 +662,10 @@
 		// Event Delegation
 		_container.on('click', function(e){
 
-			var panel = $(e.target).parents(".panel-container");
+			var panel = $(e.target).parents(".panel-container"),
+				step = _getStepNumFromPanel(panel);
 			
-			publish('onClickEvent', { event: e, panel: panel });
+			publish('onClickEvent', { event: e, step: step, panel: panel });
 
 			if(_has("next-step", e.target.className) && !e.target.disabled){
 				next(panel);
@@ -684,7 +709,8 @@
 			getStoredValue: getStoredValue,
 			storeFieldValue: setFieldValue,
 			bind: bind,
-			to: to
+			to: to,
+			then: then
 
 		};
 	})();
