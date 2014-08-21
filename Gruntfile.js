@@ -33,7 +33,7 @@ module.exports = function(grunt) {
       dist: {
         files: [{
           src: "build/assets/js/steps.min.js",
-          dest: "dest/steps.min.js"
+          dest: "dist/steps.min.js"
         }]
       }
     },
