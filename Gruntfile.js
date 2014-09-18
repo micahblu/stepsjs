@@ -9,43 +9,41 @@ module.exports = function(grunt) {
           style: 'compact'
         },
         files: {
-          'build/assets/stylesheets/steps.css': 'src/sass/steps.scss'
+          'example/stylesheets/steps.css': 'src/sass/steps.scss'
         }
       }
     },
 
     copy: {
-      js: {
+      example_js: {
         files: [{
-          cwd: "src/bower_components/",
+          cwd: "bower_components/",
           expand: true,
-          src: ["**/*"],
-          dest: "build/assets/vendor/"
+          src: ["jquery/dist/jquery.min.js", "handlebars/handlebars.min.js"],
+          dest: "example/js/"
+        },
+        {
+          src: "src/js/steps.js",
+          dest: "example/js/steps.js"
         }]
       },
       index: {
         files: [{
           src: "src/index.html",
-          dest: "build/index.html"
+          dest: "example/index.html"
         }]
       },
-
       dist: {
         files: [{
-          src: "build/assets/js/steps.min.js",
-          dest: "dist/steps.min.js"
+          src: "src/js/steps.js",
+          dest: "dist/steps.js"
+        },
+        {
+          src: "example/stylesheets/steps.css",
+          dest: "dist/steps.css"
         }]
       }
     },
-
-    /*
-    concat: {
-      app: {
-        src: ['src/js/template.js', 'src/js/steps.js'],
-
-        dest: 'src/js/steps.all.js'
-      }
-    },*/
 
     uglify: { 
       options: {
@@ -56,12 +54,12 @@ module.exports = function(grunt) {
       },
       build: {
         src: 'src/js/steps.js',
-        dest: 'build/assets/js/steps.min.js'
+        dest: 'dist/steps.min.js'
       }
     },
 
     qunit: {
-      all: ['test/index.html']
+      all: ['tests/index.html']
     },
 
     jshint: {
@@ -81,10 +79,8 @@ module.exports = function(grunt) {
                 'src/**/*.html'],
 
         tasks: ['sass',
-                //'concat',
                 'uglify',
                 'copy',
-                //-'qunit',
                 'jshint']
       }
     }
@@ -95,7 +91,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-contrib-qunit');
   grunt.loadNpmTasks('grunt-contrib-jshint');
-  
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-sass');
   grunt.loadNpmTasks('grunt-contrib-copy');

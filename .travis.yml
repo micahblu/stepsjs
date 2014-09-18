@@ -6,7 +6,6 @@ before_script:
   - npm install -g grunt
   - npm install -g grunt-cli
   - npm install -g bower
-  - cd src && bower install
-  - cd ../
+  - bower install
 
 script: grunt test --verbose --force
