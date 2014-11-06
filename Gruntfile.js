@@ -71,6 +71,17 @@ module.exports = function(grunt) {
       }
     },
 
+    connect: {
+      server: {
+        options: {
+          port: 8000,
+          keepalive: true,
+          base: 'example/',
+          open: true
+        }
+      }
+    },
+
     watch: {
       setup: {
         files: ['src/sass/*.scss', 
@@ -78,10 +89,7 @@ module.exports = function(grunt) {
                 'src/js/**/*.js',
                 'src/**/*.html'],
 
-        tasks: ['sass',
-                'uglify',
-                'copy',
-                'jshint']
+        tasks: ['sass', 'uglify', 'copy', 'jshint']
       }
     }
   });
@@ -95,11 +103,5 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-sass');
   grunt.loadNpmTasks('grunt-contrib-copy');
 
-  // Default task(s).
-  grunt.registerTask('default', ['sass', 'uglify', 'copy', 'watch']);
-
-  // Task to run tests
-  grunt.registerTask('test', 'qunit');
-
-  grunt.registerTask('cleanjs', 'jshint');
+  grunt.registerTask('default', ['sass', 'uglify', 'copy', 'connect']);
 };

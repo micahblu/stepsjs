@@ -23,7 +23,7 @@ Install Node dependencies:
 
 Intsall Bower dependencies:
 
-    cd src && bower install
+    bower install
 
 Run Grunt:
 
