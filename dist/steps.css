@@ -11,5 +11,3 @@
 .steps-container .panel-container .panel-body .step-form-controls button.prev-step:after { content: ' '; clear: both; }
 .steps-container .panel-container .panel-body .step-form-controls button.next-step { float: right; }
 .steps-container .panel-container .panel-body .step-form-controls button.next-step:after { content: ' '; clear: both; }
-
-/*# sourceMappingURL=steps.css.map */

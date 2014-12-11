@@ -4,7 +4,7 @@
  * 
  * @author : micahblu | micahblu.com | github.com/micahblu
  * @license http://opensource.org/licenses/MIT MIT License
- * @version 0.1.5
+ * @version 0.0.7
  * 
  */
 
@@ -39,8 +39,9 @@
 	 * @param Function 
 	 * @return Object this
 	 */
-	function bind(func){
+	function bind(func, param){
 		this.func = func;
+		this.param = param;
 		return this;
 	}
 
@@ -58,13 +59,18 @@
 		}
 		for(var i=0, j=topics.length; i<j; i++){
 			if(_topics[topics[i]] === undefined){
-				_topics[topics[i]] = [this.func];
+				_topics[topics[i]] = [{func: this.func, param: this.param}];
 			}else{
-				_topics[topics[i]].push(this.func);
+				_topics[topics[i]].push({func: this.func, param: this.param});
 			}
 		}
 
-		return true;
+		return this;
+	}
+
+	function then(callback, param){
+		callback.call(this, param);
+		return this;
 	}
 
 	/**
@@ -79,7 +85,12 @@
 			return false;
 		}
 		for(var i=0, j=_topics[topic].length; i<j; i++){
-			_topics[topic][i].call({topic: topic}, data);
+			if(_topics[topic][i].param){
+				_topics[topic][i].func.call({topic: topic}, data, _topics[topic][i].param);
+			}
+			else{
+				_topics[topic][i].func.call({topic: topic}, data);
+			}
 		}
 		return true;
 	}
@@ -230,11 +241,6 @@
 
 		return this;
 	}
-
-	function then(func){
-		return func.call(this);
-	}
-
 	/**
 	 * resgisterHelpers
 	 *
@@ -711,7 +717,6 @@
 			bind: bind,
 			to: to,
 			then: then
-
 		};
 	})();
 

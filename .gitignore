@@ -3,3 +3,4 @@ node_modules/
 example/
 bower_components/
 .DS_Store
+dist/steps.min.map
