@@ -1,6 +1,6 @@
 {
   "name": "stepsjs",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "A jQuery plugin that manifests a stepped form process",
   "main": "Gruntfile.js",
   "directories": {
