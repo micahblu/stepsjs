@@ -4,7 +4,7 @@
  * 
  * @author : micahblu | micahblu.com | github.com/micahblu
  * @license http://opensource.org/licenses/MIT MIT License
- * @version 0.0.8
+ * @version 0.0.9
  * 
  */
 
@@ -506,6 +506,10 @@
 		panel.next().find('.panel-body').removeClass('collapse');
 		
 		publish('onAfterLoadNext', { panel: panel });
+
+
+		console.log('evaluating panel on next', panel.next());
+		evaluate(panel.next());
 	}
 
 	/**

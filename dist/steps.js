@@ -506,6 +506,10 @@
 		panel.next().find('.panel-body').removeClass('collapse');
 		
 		publish('onAfterLoadNext', { panel: panel });
+
+
+		console.log('evaluating panel on next', panel.next());
+		evaluate(panel.next());
 	}
 
 	/**
