@@ -1,13 +1,12 @@
- /* Steps js
+	 /* Steps js
  *
  * Build your form in steps with steps js :)
  * 
  * @author : micahblu | micahblu.com | github.com/micahblu
  * @license http://opensource.org/licenses/MIT MIT License
- * @version 0.0.7
+ * @version 0.0.8
  * 
  */
-
 
 (function($){
 	
@@ -85,6 +84,7 @@
 			return false;
 		}
 		for(var i=0, j=_topics[topic].length; i<j; i++){
+
 			if(_topics[topic][i].param){
 				_topics[topic][i].func.call({topic: topic}, data, _topics[topic][i].param);
 			}
@@ -472,6 +472,7 @@
 				$("#panel-" + (_steps[i].id + 1) ).removeClass('locked');
 			}
 		}
+		publish('onPanelUnlocked', { panel: panel });
 	}
 
 	/**
@@ -591,8 +592,8 @@
 	function _injectTemplates(layout, templates, outlet){
 
 		var injection,
-			output,
-			context;
+			  output,
+			  context;
 
 		for(var i=0, j=templates.length; i<j; i++){
 			injection = templates[i].renderedTemplate;
@@ -673,7 +674,10 @@
 			
 			publish('onClickEvent', { event: e, step: step, panel: panel });
 
-			if(_has("next-step", e.target.className) && !e.target.disabled){
+			console.log('this step: ' + step + ' total steps: ' + _config.steps.length);
+			if(step === _config.steps.length){
+
+			} else if(_has("next-step", e.target.className) && !e.target.disabled){
 				next(panel);
 			} else if(_has("prev-step", e.target.className) && !e.target.disabled){
 				prev(panel);
