@@ -4,7 +4,7 @@
  * 
  * @author : micahblu | micahblu.com | github.com/micahblu
  * @license http://opensource.org/licenses/MIT MIT License
- * @version 0.1.0
+ * @version 0.1.1
  * 
  */
 
@@ -382,12 +382,11 @@
 			rgroup = [];
 
 		// check for conditions being met, if so allow continue button
-		panel.find('input[type="text"], input[type="hidden"], input[type="checkbox"], select, textarea').not(":hidden").each(function(e){
+		panel.find('input[type="text"], input[type="hidden"], input[type="checkbox"], select, textarea').each(function(e){
 
 			required = this.getAttribute('data-condition');
-
-			if(required){
-
+	
+			if(required && $(this).parents('.hide').length < 1){
 				conditions++;
 
 				_fields[this.name] = this.value;
