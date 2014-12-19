@@ -4,7 +4,7 @@
  * 
  * @author : micahblu | micahblu.com | github.com/micahblu
  * @license http://opensource.org/licenses/MIT MIT License
- * @version 0.0.8
+ * @version 0.1.0
  * 
  */
 
@@ -56,10 +56,13 @@
 		if(!topics){
 			return false;
 		}
+
 		for(var i=0, j=topics.length; i<j; i++){
 			if(_topics[topics[i]] === undefined){
 				_topics[topics[i]] = [{func: this.func, param: this.param}];
 			}else{
+				// filter this event if it already exists
+				_topics[topics[i]] = _topics[topics[i]].filter(function(e){return e.func.toString() !== this.func.toString()}.bind(this));
 				_topics[topics[i]].push({func: this.func, param: this.param});
 			}
 		}
@@ -225,10 +228,9 @@
 		// this is due to the fact steps start @ 1 and panel id's start at 0 
 		// and becuase next is implemented for the behaviour so the panel before the 
 		// requested panel needs to be passed for reference
-		
+
 		var panelIndex = (parseInt(step.replace("step-", "")) - 1),
 			panel = $("#panel-" + panelIndex);
-
 		if(!_panelLocked(panel)){
 			// Collapse all other open panel bodies
 			$('.panel-body').addClass('collapse');
