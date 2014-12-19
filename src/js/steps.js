@@ -4,7 +4,7 @@
  * 
  * @author : micahblu | micahblu.com | github.com/micahblu
  * @license http://opensource.org/licenses/MIT MIT License
- * @version 0.1.1
+ * @version 0.1.2
  * 
  */
 
@@ -508,8 +508,6 @@
 		
 		publish('onAfterLoadNext', { panel: panel });
 
-
-		console.log('evaluating panel on next', panel.next());
 		evaluate(panel.next());
 	}
 
@@ -526,6 +524,8 @@
 		publish('onBeforeLoadPrev', { panel: panel });
 
 		panel.find('.panel-body').addClass('collapse');
+
+		console.debug('panel', panel);
 
 		panel.prev().find('.panel-body').removeClass('collapse');
 
@@ -675,14 +675,11 @@
 		_container.on('click', function(e){
 
 			var panel = $(e.target).parents(".panel-container"),
-				step = _getStepNumFromPanel(panel);
+				  step = _getStepNumFromPanel(panel);
 			
 			publish('onClickEvent', { event: e, step: step, panel: panel });
 
-			console.log('this step: ' + step + ' total steps: ' + _config.steps.length);
-			if(step === _config.steps.length){
-
-			} else if(_has("next-step", e.target.className) && !e.target.disabled){
+			if(_has("next-step", e.target.className) && !e.target.disabled && step !== _config.steps.length){
 				next(panel);
 			} else if(_has("prev-step", e.target.className) && !e.target.disabled){
 				prev(panel);
