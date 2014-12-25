@@ -4,7 +4,7 @@
  * 
  * @author : micahblu | micahblu.com | github.com/micahblu
  * @license http://opensource.org/licenses/MIT MIT License
- * @version 0.1.1
+ * @version 0.1.3
  * 
  */
 
@@ -167,7 +167,6 @@
 		return _fields;
 	}
 
-
 	/**
 	 * getStoredValues
 	 *
@@ -186,6 +185,18 @@
 	}
 
 	/**
+	 * resetStoredValues
+	 *
+	 * Clears all stored values
+	 * @access public
+	 * @return Object
+	 */
+	function resetStoredValues(){
+		_fields = {};
+		return true;
+	}
+
+	/**
 	 * Checks if string is valid json
 	 *
 	 * Returns stored field value pair
@@ -194,12 +205,12 @@
 	 * @return Boolean
 	 */
 	function _isJson(str) {
-	    try {
-	        JSON.parse(str);
-	    } catch (e) {
-	        return false;
-	    }
-	    return true;
+    try {
+      JSON.parse(str);
+    } catch (e) {
+      return false;
+    }
+    return true;
 	}
 
 	/**
@@ -291,10 +302,10 @@
 
 				// add element attributes from context hash
 				for(var field in context.hash){
-		          if(context.hash.hasOwnProperty(field) && field !== 'data'){
-		            ret += ' ' + field + '=' + '"' + context.hash[field] + '"';
-		          }
-		        }
+          if(context.hash.hasOwnProperty(field) && field !== 'data'){
+            ret += ' ' + field + '=' + '"' + context.hash[field] + '"';
+          }
+        }
 
 				ret += '>';
 
@@ -322,8 +333,6 @@
 	function evaluate(panel){
 		
 		if(_conditionsMet(panel)) {
-
-			_unlockNextStep(panel);
 
 			var step = _getStepNumFromPanel(panel);
 
@@ -477,6 +486,29 @@
 	}
 
 	/**
+	 * unlockPanel 
+	 *
+	 * unlocks a specific panel
+	 * @param  jQuery object panel
+	 * @access private
+	 * @return void
+	 */
+	function unlockPanel(panelId){
+		$(panelId).removeClass('locked');
+	}
+	/**
+	 * lockPanel 
+	 *
+	 * locks a specific panel
+	 * @param  jQuery object panel
+	 * @access private
+	 * @return void
+	 */
+	function lockPanel(panelId){
+		$(panelId).addClass('locked');
+	}
+
+	/**
 	 * lockNextStep 
 	 * 
 	 * locks all subsequent panels
@@ -508,8 +540,6 @@
 		
 		publish('onAfterLoadNext', { panel: panel });
 
-
-		console.log('evaluating panel on next', panel.next());
 		evaluate(panel.next());
 	}
 
@@ -681,8 +711,6 @@
 			
 			publish('onClickEvent', { event: e, step: step, panel: panel });
 
-			console.log('CLICK', e);
-			
 			if(_has("next-step", e.target.className) && !e.target.disabled && step !== _config.steps.length){
 				next(panel);
 			} else if(_has("prev-step", e.target.className) && !e.target.disabled){
@@ -721,9 +749,12 @@
 			gotoStep: gotoStep,
 			evaluate: evaluate,
 			updateStep: updateStep,
+			preventNextStep: preventNextStep,
 			getStoredValues: getStoredValues,
 			getStoredValue: getStoredValue,
 			storeFieldValue: setFieldValue,
+			unlockPanel: unlockPanel,
+			lockPanel: lockPanel,
 			bind: bind,
 			to: to,
 			then: then
