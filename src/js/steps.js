@@ -4,7 +4,7 @@
  * 
  * @author : micahblu | micahblu.com | github.com/micahblu
  * @license http://opensource.org/licenses/MIT MIT License
- * @version 0.1.3
+ * @version 0.1.4
  * 
  */
 
@@ -335,7 +335,7 @@
 		if(_conditionsMet(panel)) {
 
 			_unlockNextStep(panel);
-			
+
 			var step = _getStepNumFromPanel(panel);
 
 			publish('onPanelValidated', { values: _fields, panel: panel, step: step });
