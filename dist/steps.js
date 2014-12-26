@@ -334,6 +334,8 @@
 		
 		if(_conditionsMet(panel)) {
 
+			_unlockNextStep(panel);
+			
 			var step = _getStepNumFromPanel(panel);
 
 			publish('onPanelValidated', { values: _fields, panel: panel, step: step });
@@ -396,7 +398,11 @@
 			required = this.getAttribute('data-condition');
 	
 			if(required && $(this).parents('.hide').length < 1){
+
 				conditions++;
+
+				console.log('evaluateing: ', this.name);
+				console.log('total conditions:', conditions);
 
 				_fields[this.name] = this.value;
 
@@ -406,10 +412,10 @@
 					if(!validators[validator]){
 						console.log('[Stepsjs Alert]: A custom validation validator was defined for "' + this.name + '" but no validator method was declared in the configuration object');
 					}else{
-
 						if(validators[validator].apply(null, [this])){
 							_fields[this.name] = this.value;
 							met++;
+							console.log('condition met for ', this.name);
 						}
 					}
 				}
