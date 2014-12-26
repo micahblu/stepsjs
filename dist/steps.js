@@ -749,7 +749,6 @@
 			gotoStep: gotoStep,
 			evaluate: evaluate,
 			updateStep: updateStep,
-			preventNextStep: preventNextStep,
 			getStoredValues: getStoredValues,
 			getStoredValue: getStoredValue,
 			storeFieldValue: setFieldValue,
