@@ -4,7 +4,7 @@
  * 
  * @author : micahblu | micahblu.com | github.com/micahblu
  * @license http://opensource.org/licenses/MIT MIT License
- * @version 0.1.4
+ * @version 0.1.5
  * 
  */
 
@@ -29,7 +29,9 @@
 		_topics = {},
 
 		// config
-		_config = {};
+		_config = {},
+
+		_allowNext = true;
 	
 	/**
 	 * bind a subscriber to a topic
@@ -334,11 +336,11 @@
 		
 		if(_conditionsMet(panel)) {
 
-			_unlockNextStep(panel);
-
 			var step = _getStepNumFromPanel(panel);
 
 			publish('onPanelValidated', { values: _fields, panel: panel, step: step });
+
+			_unlockNextStep(panel);
 
 			return true;
 		}
@@ -527,6 +529,14 @@
 		panel.nextAll().addClass('locked');
 	}
 
+	function preventNext() {
+		_allowNext = false;
+	}
+
+	function allowNext() {
+		_allowNext = true;
+	}
+
 	/**
 	 * next 
 	 * 
@@ -540,10 +550,12 @@
 
 		publish('onBeforeLoadNext', { panel: panel });
 
-		panel.find('.panel-body').addClass('collapse');
+		if(_allowNext){
+			panel.find('.panel-body').addClass('collapse');
 
-		panel.next().find('.panel-body').removeClass('collapse');
-		
+			panel.next().find('.panel-body').removeClass('collapse');
+		}
+
 		publish('onAfterLoadNext', { panel: panel });
 
 		evaluate(panel.next());
@@ -760,6 +772,8 @@
 			storeFieldValue: setFieldValue,
 			unlockPanel: unlockPanel,
 			lockPanel: lockPanel,
+			preventNext: preventNext,
+			allowNext: allowNext,
 			bind: bind,
 			to: to,
 			then: then
