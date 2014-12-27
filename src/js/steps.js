@@ -4,7 +4,7 @@
  * 
  * @author : micahblu | micahblu.com | github.com/micahblu
  * @license http://opensource.org/licenses/MIT MIT License
- * @version 0.1.5
+ * @version 0.1.6
  * 
  */
 
@@ -88,6 +88,7 @@
 		if(!_topics.hasOwnProperty(topic)){ 
 			return false;
 		}
+		console.log('topics', _topics);
 		for(var i=0, j=_topics[topic].length; i<j; i++){
 
 			if(_topics[topic][i].param){
@@ -403,9 +404,6 @@
 
 				conditions++;
 
-				console.log('evaluateing: ', this.name);
-				console.log('total conditions:', conditions);
-
 				_fields[this.name] = this.value;
 
 				validator = this.getAttribute('data-validator');
@@ -557,6 +555,7 @@
 		}
 
 		publish('onAfterLoadNext', { panel: panel });
+		publish('onPanelExpanded', { panel: panel });
 
 		evaluate(panel.next());
 	}
@@ -575,11 +574,10 @@
 
 		panel.find('.panel-body').addClass('collapse');
 
-		console.debug('panel', panel);
-
 		panel.prev().find('.panel-body').removeClass('collapse');
 
 		publish('onAfterLoadPrev', { panel: panel });
+		publish('onPanelExpanded', { panel: panel });
 	}
 
 	/**
