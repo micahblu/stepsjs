@@ -31,8 +31,9 @@
 		// config
 		_config = {},
 
-		_allowNext = true;
+		_allowNext = true
 	
+
 	/**
 	 * bind a subscriber to a topic
 	 * must be chained with following `to` method
@@ -334,7 +335,7 @@
 	 * @return Boolean
 	 */
 	function evaluate(panel){
-		
+
 		if(_conditionsMet(panel)) {
 
 			var step = _getStepNumFromPanel(panel);
@@ -373,7 +374,26 @@
 
 		$(panelID).find('.panel-content').html(html);
 	}
-
+	/**
+	 * evaluateRule
+	 * determines if a value upholds a rule
+	 * @param rule String
+	 * @param value String
+	 * @return Boolean
+	 */
+	function _evaluateRule(rule, value) {
+		if(rule === 'ALPHA') {
+			return /^[A-Za-z]+$/.test(value);
+		} else if (rule === 'ALPHANUMERIC') { 
+			return /^[A-Za-z0-9]$/.test(value);
+		} else if (rule === 'NUMERIC') {
+			return /^[0-9]+$/.test(value);
+		} else {
+			// the rule should be a valid regex contained inside forward slashes
+			rule = new RegExp(rule);
+			rule.test(value);
+		}
+	}
 	/**
 	 * conditionsMet
 	 * @param  jQuery object panel
@@ -386,9 +406,10 @@
 			return false;
 		}
 
-		//set our conditions and met vars
+		//set conditions and met vars
 		var validators = _config.validators || null,
-			validator = '', 
+			validator = '',
+			rule = '',
 			conditions = 0,
 			met = 0,
 			regex = '',
@@ -407,8 +428,25 @@
 				_fields[this.name] = this.value;
 
 				validator = this.getAttribute('data-validator');
+				rule = this.getAttribute('data-rule');
 
-				if(validator){
+				if(validator && rule){
+					console.log('Warning: Both a custom validation method and a data rule where attributed to field: "' + this.name + '", the rule will be used');
+				}
+				if(rule) {
+					if(_evaluateRule(rule, this.value)){
+						met++;
+						console.log('condition met for ', this.name);
+
+						// Remove invalid class if present
+						//$(this).removeClass('invalid');
+					}else{
+						if(!_isPreEvaluating){
+							//$(this).addClass('invalid');
+						}
+					}
+				}
+				else if(validator){
 					if(!validators[validator]){
 						console.log('[Stepsjs Alert]: A custom validation validator was defined for "' + this.name + '" but no validator method was declared in the configuration object');
 					}else{
@@ -416,6 +454,13 @@
 							_fields[this.name] = this.value;
 							met++;
 							console.log('condition met for ', this.name);
+
+							// Remove invalid class if present
+							//$(this).removeClass('invalid');
+						} else {
+							if(!_isPreEvaluating){
+								//$(this).addClass('invalid');
+							}
 						}
 					}
 				}
@@ -698,7 +743,6 @@
 				return false;
 			}
 		});
-
 	}
 
 	function _attachChangeEvents(){
