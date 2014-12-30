@@ -4,7 +4,7 @@
  * 
  * @author : micahblu | micahblu.com | github.com/micahblu
  * @license http://opensource.org/licenses/MIT MIT License
- * @version 0.1.7
+ * @version 0.1.8
  * 
  */
 
@@ -441,9 +441,7 @@
 						// Remove invalid class if present
 						//$(this).removeClass('invalid');
 					}else{
-						if(!_isPreEvaluating){
-							//$(this).addClass('invalid');
-						}
+						//$(this).addClass('invalid');
 					}
 				}
 				else if(validator){
@@ -453,14 +451,10 @@
 						if(validators[validator].apply(null, [this])){
 							_fields[this.name] = this.value;
 							met++;
-							console.log('condition met for ', this.name);
-
 							// Remove invalid class if present
 							//$(this).removeClass('invalid');
 						} else {
-							if(!_isPreEvaluating){
-								//$(this).addClass('invalid');
-							}
+							//$(this).addClass('invalid');
 						}
 					}
 				}
