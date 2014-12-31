@@ -4,7 +4,7 @@
  * 
  * @author : micahblu | micahblu.com | github.com/micahblu
  * @license http://opensource.org/licenses/MIT MIT License
- * @version 0.1.8
+ * @version 0.2.0
  * 
  */
 
@@ -31,7 +31,8 @@
 		// config
 		_config = {},
 
-		_allowNext = true
+		// Toggle var for allowing/preventing the next panel from opening
+		_allowNext = true;
 	
 
 	/**
@@ -369,8 +370,8 @@
 	function updateStep(step, context){
 
 		var panelIndex = parseInt(step.replace("step-", "") - 1),
-			panelID = "#panel-" + panelIndex,
-			html = _steps[panelIndex].template.render(context);
+			  panelID = "#panel-" + panelIndex,
+			  html = _steps[panelIndex].template.render(context);
 
 		$(panelID).find('.panel-content').html(html);
 	}
@@ -436,12 +437,7 @@
 				if(rule) {
 					if(_evaluateRule(rule, this.value)){
 						met++;
-						console.log('condition met for ', this.name);
-
-						// Remove invalid class if present
-						//$(this).removeClass('invalid');
-					}else{
-						//$(this).addClass('invalid');
+						_fields[this.name] = this.value;
 					}
 				}
 				else if(validator){
@@ -451,10 +447,6 @@
 						if(validators[validator].apply(null, [this])){
 							_fields[this.name] = this.value;
 							met++;
-							// Remove invalid class if present
-							//$(this).removeClass('invalid');
-						} else {
-							//$(this).addClass('invalid');
 						}
 					}
 				}
@@ -743,6 +735,7 @@
 
 		_container.on('keyup change', 'select, input, textarea', function(e){
 			
+			//store the value
 			_fields[this.name] = this.value;
 
 			var panel = $(e.target).parents('.panel-container');
@@ -787,10 +780,68 @@
 			}
 		});
 	}
+	
+	function _attachBlurEvents(){
+		_container.on('blur change', 'select, input, textarea', function(e) {
+			var required = this.getAttribute('data-condition');
+		
+			if(required && $(this).parents('.hide').length < 1){
+
+				var validators = _config.validators || null,
+					  validator = this.getAttribute('data-validator'),
+				    rule = this.getAttribute('data-rule'),
+				    valid = true;
+
+
+				var errors = [];
+				if(rule) {
+					if(_evaluateRule(rule, this.value)){
+						valid = true;
+					}else{
+						valid = false;
+						errors.push({"rule": "invalid", "value": this.value });
+					}
+				}
+				else if(validator){
+					if(!validators[validator]){
+						console.log('[Stepsjs Alert]: A custom validation validator was defined for "' + this.name + '" but no validator method was declared in the configuration object');
+					}else{
+						if(validators[validator].apply(null, [this])){
+							valid = true;
+						}else{
+							valid = false;
+							errors.push({"validator": "invalid", "value": this.value });
+						}
+					}
+				}
+				else if(this.value.trim() === ""){
+					valid = false;
+					errors.push({"empty": "invalid", "value": this.value });
+				}
+
+				if(valid){
+					if($(this).parent('.form-group')){
+						$(this).parent('.form-group').addClass('has-success');
+						$(this).parent('.form-group').removeClass('has-error');
+					} else {
+						$(this).removeClass('invalid');
+					}
+				}else{
+					if($(this).parent('.form-group')){
+						$(this).parent('.form-group').addClass('has-error');
+						$(this).parent('.form-group').removeClass('has-success');
+					} else {
+						$(this).addClass('invalid');
+					}
+				}
+			}
+		});
+	}
 
 	function _attachEventHandlers(){
 		_attachChangeEvents();
 		_attachClickEvents();
+		_attachBlurEvents();
 	}
 
 
