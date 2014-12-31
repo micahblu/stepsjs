@@ -94,11 +94,11 @@ module.exports = function(grunt) {
     },
     bump: {
       options: {
-        files: ['package.json', 'bower.json', 'src/js/steps.js'],
+        files: ['package.json', 'bower.json'],
         updateConfigs: [],
         commit: true,
         commitMessage: 'Release %VERSION%',
-        commitFiles: ['package.json'],
+        commitFiles: ['-a'],
         createTag: true,
         tagName: '%VERSION%',
         tagMessage: 'Version %VERSION%',
@@ -121,4 +121,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-bump');
 
   grunt.registerTask('default', ['sass', 'uglify', 'copy']);
+
+  grunt.registerTask('bumpit', ['bump']);
 };
