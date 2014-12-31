@@ -91,6 +91,22 @@ module.exports = function(grunt) {
 
         tasks: ['sass', 'uglify', 'copy', 'jshint']
       }
+    },
+    bump: {
+      options: {
+        files: ['package.json', 'bower.json', 'src/js/steps.js'],
+        updateConfigs: [],
+        commit: true,
+        commitMessage: 'Release %VERSION%',
+        commitFiles: ['package.json'],
+        createTag: true,
+        tagName: '%VERSION%',
+        tagMessage: 'Version %VERSION%',
+        push: true,
+        pushTo: 'upstream',
+        gitDescribeOptions: '--tags --always --abbrev=1 --dirty=-d',
+        globalReplace: false
+      }
     }
   });
 
@@ -102,6 +118,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-sass');
   grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-bump');
 
   grunt.registerTask('default', ['sass', 'uglify', 'copy']);
 };
