@@ -89,7 +89,6 @@
 		if(!_topics.hasOwnProperty(topic)){ 
 			return false;
 		}
-		console.log('topics', _topics);
 		for(var i=0, j=_topics[topic].length; i<j; i++){
 
 			if(_topics[topic][i].param){
