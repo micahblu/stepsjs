@@ -4,7 +4,6 @@
  * 
  * @author : micahblu | micahblu.com | github.com/micahblu
  * @license http://opensource.org/licenses/MIT MIT License
- * @version 0.1.9
  * 
  */
 
@@ -90,7 +89,6 @@
 		if(!_topics.hasOwnProperty(topic)){ 
 			return false;
 		}
-		console.log('topics', _topics);
 		for(var i=0, j=_topics[topic].length; i<j; i++){
 
 			if(_topics[topic][i].param){
