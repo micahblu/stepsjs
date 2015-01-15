@@ -1,23 +1,23 @@
 	 /* Steps js
  *
  * Build your form in steps with steps js :)
- * 
+ *
  * @author : micahblu | micahblu.com | github.com/micahblu
  * @license http://opensource.org/licenses/MIT MIT License
- * 
+ *
  */
 
 (function($){
-	
+
 	'use strict';
 
-	var 
+	var
 		// Stores collected form field values
 		_fields = {},
 
 		// Will hold an array of steps objects, passed via init options param
-		_steps = [], 
-		
+		_steps = [],
+
 		// Containing div that contains the entire steps form
 		_container = {},
 
@@ -32,13 +32,13 @@
 
 		// Toggle var for allowing/preventing the next panel from opening
 		_allowNext = true;
-	
+
 
 	/**
 	 * bind a subscriber to a topic
 	 * must be chained with following `to` method
 	 * @access public
-	 * @param Function 
+	 * @param Function
 	 * @return Object this
 	 */
 	function bind(func, param){
@@ -48,7 +48,7 @@
 	}
 
 	/**
-	 * Attaches topics to bound function set 
+	 * Attaches topics to bound function set
 	 * with preceding chained bind method
 	 * @access public
 	 * @param topics Array
@@ -86,7 +86,7 @@
 	 * @return Boolean
 	 */
 	function publish(topic, data){
-		if(!_topics.hasOwnProperty(topic)){ 
+		if(!_topics.hasOwnProperty(topic)){
 			return false;
 		}
 		for(var i=0, j=_topics[topic].length; i<j; i++){
@@ -115,7 +115,7 @@
 
 		// Inject with steps template
 		_layout = _injectTemplates(config.layoutTemplate, _steps, 'step');
-		
+
 		// Insert to DOM
 		_container.html(_layout);
 
@@ -138,7 +138,7 @@
 	 */
 	function _generateIds(arr){
 		for(var i=0, j=arr.length; i<j; i++){
-			arr[i].id = 'steps-' + i;	
+			arr[i].id = 'steps-' + i;
 		}
 		return arr;
 	}
@@ -183,7 +183,7 @@
 		}
 		if(parse && _isJson(_fields[key])){
 			return JSON.parse(_fields[key]);
-		}	
+		}
 		return _fields[key];
 	}
 
@@ -232,15 +232,15 @@
 	 * gotoStep
 	 *
 	 * Will open any unlocked step
-	 * @param {step} String 
+	 * @param {step} String
 	 * @access public
 	 * @return void
 	 */
 	function gotoStep(step){
 
 		// panel index will be at a panel index of minus 2
-		// this is due to the fact steps start @ 1 and panel id's start at 0 
-		// and becuase next is implemented for the behaviour so the panel before the 
+		// this is due to the fact steps start @ 1 and panel id's start at 0
+		// and becuase next is implemented for the behaviour so the panel before the
 		// requested panel needs to be passed for reference
 
 		var panelIndex = (parseInt(step.replace("step-", "")) - 1),
@@ -265,10 +265,10 @@
 	 * @return void
 	 */
 	function _registerHelpers(){
-		
+
 		/**
 		 * Handlebars 'select' Helper
-		 * @param  {object} context	
+		 * @param  {object} context
 		 * @return {Handlebars SafeString}
 		 */
 
@@ -278,7 +278,7 @@
 
 				// Obtain the model
 				if(context.hash.data && context.hash.data.match(/\./)){
-							
+
 					var props = context.hash.data.split("."),
 						model = window;
 
@@ -296,7 +296,7 @@
 					console.log('Error: Select helper needs a data context to be passed as a paramter');
 					return;
 				}
-			
+
 				// Build the component
 				var ret = '<select',
 						label = context.hash.dataLabelField,
@@ -327,7 +327,7 @@
 	}
 
 	/**
-	 * evaluate evaluates validation conditions on panels and locks/unlocks steps accordingly	
+	 * evaluate evaluates validation conditions on panels and locks/unlocks steps accordingly
 	 *
 	 * @param  jQuery Object panel
 	 * @access public
@@ -359,7 +359,7 @@
 	/**
 	 * updateStep
 	 *
-	 * Updates the handlebars template for a given step with new context 
+	 * Updates the handlebars template for a given step with new context
 	 * @param String step
 	 * @param Object context
 	 * @access public
@@ -383,7 +383,7 @@
 	function _evaluateRule(rule, value) {
 		if(rule === 'ALPHA') {
 			return /^[A-Za-z]+$/.test(value);
-		} else if (rule === 'ALPHANUMERIC') { 
+		} else if (rule === 'ALPHANUMERIC') {
 			return /^[A-Za-z0-9]$/.test(value);
 		} else if (rule === 'NUMERIC') {
 			return /^[0-9]+$/.test(value);
@@ -419,7 +419,7 @@
 		panel.find('input[type="text"], input[type="hidden"], input[type="checkbox"], select, textarea').each(function(e){
 
 			required = this.getAttribute('data-condition');
-	
+
 			if(required && $(this).parents('.hide').length < 1){
 
 				conditions++;
@@ -449,7 +449,7 @@
 					}
 				}
 
-				// No custom handler defined, 
+				// No custom handler defined,
 				// instead rely on data-expected attribute for validation
 				else{
 
@@ -469,7 +469,7 @@
 				}
 			}
 		});
-		
+
 		panel.find('input[type="radio"]').each(function(){
 
 			// Find condition to meet
@@ -496,7 +496,7 @@
 	}
 
 	/**
-	 * unlockNextStep 
+	 * unlockNextStep
 	 *
 	 * unlocks all validated subsequent steps
 	 * @param  jQuery object panel
@@ -504,7 +504,7 @@
 	 * @return void
 	 */
 	function _unlockNextStep(panel){
-		
+
 		// Enable next button
 		panel.find(".next-step").removeAttr("disabled");
 
@@ -521,7 +521,7 @@
 	}
 
 	/**
-	 * unlockPanel 
+	 * unlockPanel
 	 *
 	 * unlocks a specific panel
 	 * @param  jQuery object panel
@@ -532,7 +532,7 @@
 		$(panelId).removeClass('locked');
 	}
 	/**
-	 * lockPanel 
+	 * lockPanel
 	 *
 	 * locks a specific panel
 	 * @param  jQuery object panel
@@ -544,8 +544,8 @@
 	}
 
 	/**
-	 * lockNextStep 
-	 * 
+	 * lockNextStep
+	 *
 	 * locks all subsequent panels
 	 * @param  jQuery object panel
 	 * @access private
@@ -565,8 +565,8 @@
 	}
 
 	/**
-	 * next 
-	 * 
+	 * next
+	 *
 	 * collapses current panel and displays next
 	 * @param  Object panel
 	 * @access public
@@ -590,15 +590,15 @@
 	}
 
 	/**
-	 * prev 
-	 * 
-	 * collapses current panel and displays previous								
+	 * prev
+	 *
+	 * collapses current panel and displays previous
 	 * @param  Object panel
 	 * @access public
 	 * @return void
 	 */
 	function prev(panel){
-		
+
 		publish('onBeforeLoadPrev', { panel: panel });
 
 		panel.find('.panel-body').addClass('collapse');
@@ -629,9 +629,9 @@
 	 * @return String - compiled html string
 	 */
 	function _renderTemplate(template_src, context){
-		
+
 		// Based on template syntax look for either in document handlebars template or
-		// or load from an already loaded external template file  
+		// or load from an already loaded external template file
 		var source,
 			template,
 			output;
@@ -640,13 +640,13 @@
 		if(/#/.test(template_src)){
 
 			source = $(template_src).html();
-  
+
 			template = Handlebars.compile(source);
-			
+
 			output = new Handlebars.SafeString(template(context));
 
 		}
-		// Handlebars Pre Compiled 
+		// Handlebars Pre Compiled
 		else{
 
 			template = template_src.render;
@@ -655,7 +655,7 @@
 		}
 
 		return output;
-		
+
 	}
 
 	function _preRenderSteps(steps){
@@ -679,7 +679,7 @@
 
 		for(var i=0, j=templates.length; i<j; i++){
 			injection = templates[i].renderedTemplate;
-			
+
 			context = $.extend(templates[i].context, {
 				id: i,
 				steps: injection
@@ -695,7 +695,7 @@
 	}
 
 	function _setPanelDefaults(){
-		
+
 		_container.find('.panel-body').addClass('collapse');
 
 		_container.find('.panel-container:first').find('.panel-body').removeClass('collapse');
@@ -709,7 +709,7 @@
 		// by default lock panels
 		_container.find(".panel-container").addClass('locked');
 
-		// Unlock first step 
+		// Unlock first step
 		_container.find(".panel-container:first-child").removeClass('locked');
 	}
 
@@ -731,8 +731,8 @@
 
 	function _attachChangeEvents(){
 
-		_container.on('keyup change', 'select, input, textarea', function(e){
-			
+		_container.off('keyup.stepsjs change.stepsjs').on('keyup.stepsjs change.stepsjs', 'select, input, textarea', function(e){
+
 			//store the value
 			_fields[this.name] = this.value;
 
@@ -741,19 +741,19 @@
 			publish('onFieldChange', { panel: panel, event: e });
 
 			evaluate(panel);
-			
+
 		});
 	}
 
 
 	function _attachClickEvents(){
-		
+
 		// Event Delegation
-		_container.on('click', function(e){
+		_container.off('click.stepsjs').on('click.stepsjs', function(e){
 
 			var panel = $(e.target).parents(".panel-container"),
 				  step = _getStepNumFromPanel(panel);
-			
+
 			publish('onClickEvent', { event: e, step: step, panel: panel });
 
 			if(_has("next-step", e.target.className) && !e.target.disabled && step !== _config.steps.length){
@@ -765,7 +765,7 @@
 				if(!panel.hasClass("locked")){
 
 					if(panel.find(".panel-body").hasClass("collapse")){
-					
+
 						// collapse this panel
 						$('.panel-body').addClass('collapse');
 
@@ -778,11 +778,11 @@
 			}
 		});
 	}
-	
+
 	function _attachBlurEvents(){
-		_container.on('blur change', 'select, input, textarea', function(e) {
+		_container.off('blur.stepsjs change.stepsjs').on('blur.stepsjs change.stepsjs', 'select, input, textarea', function(e) {
 			var required = this.getAttribute('data-condition');
-		
+
 			if(required && $(this).parents('.hide').length < 1){
 
 				var validators = _config.validators || null,
@@ -844,7 +844,7 @@
 
 
 	/**
-	 * $.steps 
+	 * $.steps
 	 * Exposes stepsjs API
 	 */
 	$.steps = (function(){
